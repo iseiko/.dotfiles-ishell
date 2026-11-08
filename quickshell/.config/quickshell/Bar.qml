@@ -1,169 +1,251 @@
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Services.Pipewire
 import Quickshell.Services.UPower
 import QtQuick
 
-Scope {
+// The bar: the bottom side of the frame. It has no background, the frame draws it.
+Item {
   id: root
-  required property var launcher
-  required property var powerMenu
 
-  readonly property var sink: Pipewire.defaultAudioSink
   readonly property var battery: UPower.displayDevice
 
   readonly property bool charging: battery.state === UPowerDeviceState.Charging
                                 || battery.state === UPowerDeviceState.FullyCharged
   readonly property int batteryPercent: Math.round(battery.percentage * 100)
-  readonly property int volumePercent: sink && sink.audio ? Math.round(sink.audio.volume * 100) : 0
-  readonly property bool muted: sink && sink.audio ? sink.audio.muted : false
+  readonly property string batteryLabel: {
+    if (battery.state === UPowerDeviceState.FullyCharged) return "Battery - full"
+    if (charging) return "Battery - charging"
+    return "Battery - discharging"
+  }
 
-  // Audio properties only update while the node is tracked
-  PwObjectTracker { objects: [ root.sink ] }
+  // X position of the middle of the music chip, used to open the music popup right above it
+  function musicCenter() {
+    return musicChip.mapToItem(root, musicChip.width / 2, 0).x
+  }
 
   SystemClock {
     id: clock
     precision: SystemClock.Minutes
   }
 
-  // The base for the whole bar, its where all the modules are located
-  PanelWindow {
-    anchors { bottom: true; left: true; right: true }
-    implicitHeight: 40
-    color: Theme.base
+  // LEFT: launcher button + workspaces + music
+  Row {
+    anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 12 }
+    spacing: 8
 
-    // LEFT: launcher button + workspaces
-    Row {
-      anchors { left: parent.left; verticalCenter: parent.verticalCenter; leftMargin: 8 }
-      spacing: 8
+    Rectangle {
+      width: 32; height: 28; radius: 8
+      color: appMouse.containsMouse || Visibilities.launcher ? Theme.overlay : Theme.surface
 
-      Rectangle {
-        width: 32; height: 28; radius: 8
-        color: appMouse.containsMouse || root.launcher.open ? Theme.overlay : Theme.surface
-
-        Text {
-          anchors.centerIn: parent
-          text: "󰀻"   // Nerd Font icon; use "Apps" if it shows a box
-          color: Theme.accent
-          font.pixelSize: 16
-        }
-
-        MouseArea {
-          id: appMouse
-          anchors.fill: parent
-          hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
-          onClicked: root.launcher.open = !root.launcher.open
-        }
+      Text {
+        anchors.centerIn: parent
+        text: Icons.apps
+        color: Theme.accent
+        font.pixelSize: 16
       }
 
-      // Workspace row (NEED TO ADD CLICKABLE WORKSPACE BUTTON)
+      MouseArea {
+        id: appMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Visibilities.toggle("launcher")
+      }
+    }
+
+    // Workspace row (NEED TO ADD CLICKABLE WORKSPACE BUTTON)
+    Row {
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: 4
+
+      Repeater {
+        model: 5   // workspaces 1-5
+
+        delegate: Rectangle {
+          required property int index
+          readonly property int wsId: index + 1
+          readonly property bool active: Hyprland.focusedWorkspace
+                                      && Hyprland.focusedWorkspace.id === wsId
+
+          width: 28; height: 28; radius: 8
+          color: active ? Theme.accent : wsMouse.containsMouse ? Theme.overlay : Theme.surface
+
+          Text {
+            anchors.centerIn: parent
+            text: parent.wsId
+            color: parent.active ? Theme.base : Theme.text
+            font.pixelSize: 14
+            font.bold: parent.active
+          }
+
+          MouseArea {
+            id: wsMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: Quickshell.execDetached(["hyprctl", "dispatch",
+                                                'hl.dsp.focus({ workspace = "' + parent.wsId + '" })'])
+          }
+        }
+      }
+    }
+
+    // Music chip: only visible while a media player exists, click opens the music popup
+    Rectangle {
+      id: musicChip
+      visible: Media.player !== null
+      height: 28; radius: 8
+      width: chipRow.implicitWidth + 16
+      color: musicMouse.containsMouse || Visibilities.music ? Theme.overlay : Theme.surface
+
       Row {
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: 4
+        id: chipRow
+        anchors.centerIn: parent
+        spacing: 8
 
-        Repeater {
-          model: 5   // workspaces 1-5
+        // Album art thumbnail (falls back to a note icon)
+        Item {
+          anchors.verticalCenter: parent.verticalCenter
+          width: 20; height: 20
 
-          delegate: Rectangle {
-            required property int index
-            readonly property int wsId: index + 1
-            readonly property bool active: Hyprland.focusedWorkspace
-                                        && Hyprland.focusedWorkspace.id === wsId
+          RoundedImage {
+            anchors.fill: parent
+            radius: 6
+            source: Media.artUrl
+            visible: status === Image.Ready
+          }
+          Text {
+            anchors.centerIn: parent
+            visible: Media.artUrl === ""
+            text: Icons.music
+            color: Theme.accent
+            font.pixelSize: 16
+          }
+        }
 
-            width: 28; height: 28; radius: 8
-            color: active ? Theme.accent : wsMouse.containsMouse ? Theme.overlay : Theme.surface
+        // Little equalizer, moves while playing
+        Row {
+          anchors.verticalCenter: parent.verticalCenter
+          spacing: 2
+          height: 14
 
-            Text {
-              anchors.centerIn: parent
-              text: parent.wsId
-              color: parent.active ? Theme.base : Theme.text
-              font.pixelSize: 14
-              font.bold: parent.active
-            }
+          Repeater {
+            model: 3
+            delegate: Rectangle {
+              required property int index
+              anchors.bottom: parent.bottom
+              width: 3; radius: 1.5
+              height: 4
+              color: Theme.accent
 
-            MouseArea {
-              id: wsMouse
-              anchors.fill: parent
-              hoverEnabled: true
-              cursorShape: Qt.PointingHandCursor
-              onClicked: Hyprland.dispatch("workspace " + parent.wsId)
+              SequentialAnimation on height {
+                running: Media.playing
+                loops: Animation.Infinite
+                NumberAnimation { to: 14; duration: 380 + index * 110; easing.type: Easing.InOutSine }
+                NumberAnimation { to: 4;  duration: 380 + index * 110; easing.type: Easing.InOutSine }
+              }
             }
           }
         }
-      }
-    }
-
-    // CENTER: time and date
-    Row {
-      anchors.centerIn: parent
-      spacing: 12
-
-      Text {
-        text: Qt.formatDateTime(clock.date, "HH:mm")
-        color: Theme.text
-        font.pixelSize: 15
-        font.bold: true
-      }
-      Text {
-        text: Qt.formatDateTime(clock.date, "ddd, dd MMM")
-        color: Theme.subtext
-        font.pixelSize: 15
-      }
-    }
-
-    // RIGHT: volume and battery
-    Row {
-      anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 12 }
-      spacing: 16
-
-      // Volume: click = mute, scroll = change (NEED TO ADD ICON)
-      Text {
-        text: root.muted ? "Vol muted" : "Vol " + root.volumePercent + "%"
-        color: root.muted ? Theme.muted : Theme.text
-        font.pixelSize: 14
-
-        MouseArea {
-          anchors.fill: parent
-          cursorShape: Qt.PointingHandCursor
-          onClicked: if (root.sink && root.sink.audio)
-                       root.sink.audio.muted = !root.sink.audio.muted
-          onWheel: wheel => {
-            if (!root.sink || !root.sink.audio) return
-            const step = wheel.angleDelta.y > 0 ? 0.05 : -0.05
-            root.sink.audio.volume = Math.max(0, Math.min(1, root.sink.audio.volume + step))
-          }
-        }
-      }
-
-      // Battery (NEED TO ADD ICON)
-      Text {
-        visible: root.battery.isPresent
-        text: (root.charging ? "Bat+ " : "Bat ") + root.batteryPercent + "%"
-        color: !root.charging && root.batteryPercent <= 20 ? Theme.danger
-             : root.charging ? Theme.success : Theme.text
-        font.pixelSize: 14
-      }
-
-      // Logout menu button
-      Rectangle {
-        width: 28; height: 28; radius: 8
-        color: pwrMouse.containsMouse ? Theme.overlay : Theme.surface
 
         Text {
-          anchors.centerIn: parent
-          text: "󰐥"              // use "⏻" or "Off" if it shows a box
-          color: Theme.danger
-          font.pixelSize: 16
+          anchors.verticalCenter: parent.verticalCenter
+          width: Math.min(implicitWidth, 220)
+          text: Media.artist !== "" ? Media.title + " - " + Media.artist : Media.title
+          color: Theme.text
+          font.pixelSize: 14
+          elide: Text.ElideRight
         }
+      }
 
-        MouseArea {
-          id: pwrMouse
-          anchors.fill: parent
-          hoverEnabled: true
-          cursorShape: Qt.PointingHandCursor
-          onClicked: root.powerMenu.open = !root.powerMenu.open
-        }
+      MouseArea {
+        id: musicMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Visibilities.toggle("music")
+      }
+    }
+  }
+
+  // CENTER: time and date
+  Row {
+    anchors.centerIn: parent
+    spacing: 12
+
+    Text {
+      text: Qt.formatDateTime(clock.date, "HH:mm")
+      color: Theme.text
+      font.pixelSize: 15
+      font.bold: true
+    }
+    Text {
+      text: Qt.formatDateTime(clock.date, "ddd, dd MMM yyyy")
+      color: Theme.subtext
+      font.pixelSize: 15
+    }
+  }
+
+  // RIGHT: volume, battery and the logout button
+  Row {
+    anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 12 }
+    spacing: 16
+
+    // Volume: click = open the panel, right click = mute, scroll = change
+    BarModule {
+      icon: Icons.volume(Audio.volume, Audio.muted)
+      iconColor: Audio.muted ? Theme.muted : Theme.accent
+      value: Audio.muted ? "" : Math.round(Audio.volume * 100) + "%"
+      label: Audio.muted ? "Volume - muted" : "Volume"
+      active: Visibilities.osd
+      onClicked: button => {
+        if (button === Qt.RightButton) Audio.toggleMute()
+        else Osd.toggle()
+      }
+      onScrolled: delta => Audio.changeVolume(delta > 0 ? 0.05 : -0.05)
+    }
+
+    // Brightness: click = open the panel, scroll = change. Hidden when there is no backlight.
+    BarModule {
+      visible: Brightness.available
+      icon: Icons.brightness(Brightness.value)
+      value: Math.round(Brightness.value * 100) + "%"
+      label: "Brightness"
+      active: Visibilities.osd
+      onClicked: Osd.toggle()
+      onScrolled: delta => Brightness.change(delta > 0 ? 5 : -5)
+    }
+
+    // Battery: only shows its label on hover
+    BarModule {
+      visible: root.battery.isPresent
+      clickable: false
+      icon: Icons.battery(root.batteryPercent, root.charging)
+      iconColor: !root.charging && root.batteryPercent <= 20 ? Theme.danger
+               : root.charging ? Theme.success : Theme.accent
+      value: root.batteryPercent + "%"
+      valueColor: !root.charging && root.batteryPercent <= 20 ? Theme.danger : Theme.text
+      label: root.batteryLabel
+    }
+
+    // Logout menu button
+    Rectangle {
+      width: 28; height: 28; radius: 8
+      color: pwrMouse.containsMouse || Visibilities.power ? Theme.overlay : Theme.surface
+
+      Text {
+        anchors.centerIn: parent
+        text: Icons.power
+        color: Theme.danger
+        font.pixelSize: 16
+      }
+
+      MouseArea {
+        id: pwrMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Visibilities.toggle("power")
       }
     }
   }

@@ -1,11 +1,11 @@
 {
-  "base":    "#141218",
-  "surface": "#211f24",
-  "overlay": "#2b292f",
-  "text":    "#e6e1e9",
-  "subtext": "#cac4cf",
-  "muted":   "#948f99",
-  "accent":  "#cfbdfe",
+  "base":    "#0f1417",
+  "surface": "#1b2023",
+  "overlay": "#262b2e",
+  "text":    "#dfe3e7",
+  "subtext": "#c0c7cd",
+  "muted":   "#8a9297",
+  "accent":  "#8dcff2",
   "danger":  "#ffb4ab",
   "success": "#91d5ad"
 }

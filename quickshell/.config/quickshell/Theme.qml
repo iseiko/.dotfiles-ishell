@@ -7,7 +7,14 @@ import QtQuick
 Singleton {
   id: root
 
-  // There are de colors defined by matugen and in what format they should be read
+  // ---- Layout of the frame --------------------------------------------------
+  readonly property int border: 10          // thickness of the frame on the top, left and right
+  readonly property int barHeight: 40       // the bar is the bottom side of the frame
+  readonly property int rounding: 24        // roundness of the screen's inner corners
+  readonly property int popoutRounding: 20  // roundness of the popups' top corners
+  readonly property int fillet: 20          // size of the concave curve where a popup meets the bar
+
+  // ---- Colors, defined by matugen and read from colors.json -----------------
   readonly property color base:    adapter.base
   readonly property color surface: adapter.surface
   readonly property color overlay: adapter.overlay

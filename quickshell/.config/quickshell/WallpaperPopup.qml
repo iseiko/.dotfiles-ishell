@@ -34,7 +34,7 @@ Item {
     property string path: ""
     command: [
       "sh", "-c",
-      'echo "$0" > ~/.cache/current_wall; matugen image "$0" -m dark --source-color-index 0; hyprctl reload; awww img "$0" --transition-type random --transition-duration 1',
+      'echo "$0" > ~/.cache/current_wall; matugen image "$0" -m dark --source-color-index 0; python3 ~/.config/kitty/shell-colors.py; pkill -USR1 kitty; hyprctl reload; awww img "$0" --transition-type grow',
       path
     ]
 

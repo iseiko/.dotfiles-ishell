@@ -29,7 +29,8 @@ Singleton {
   function notify() { if (ready) show() }
 
   function show() {
-    if (Visibilities.power) return   // the power menu uses the same corner
+    // the power, Wi-Fi and Bluetooth panels use the same corner
+    if (Visibilities.power || Visibilities.wifi || Visibilities.bluetooth) return
     Visibilities.osd = true
     hideTimer.restart()
   }

@@ -11,6 +11,8 @@ Singleton {
   property bool power: false
   property bool picker: false
   property bool music: false
+  property bool wifi: false
+  property bool bluetooth: false
 
   // The volume/brightness panel. It pops out and hides by itself (see Osd.qml), so it is NOT part
   // of `any`: it never takes the whole screen's input.
@@ -19,15 +21,17 @@ Singleton {
   // X position (in screen pixels) of the music chip, so the music popup opens right above it
   property real musicAnchorX: 0
 
-  readonly property bool any: launcher || power || picker || music
+  readonly property bool any: launcher || power || picker || music || wifi || bluetooth
   // These popups have text input or key navigation
-  readonly property bool wantsKeyboard: launcher || power || picker
+  readonly property bool wantsKeyboard: launcher || power || picker || wifi
 
   function closeAll() {
     launcher = false
     power = false
     picker = false
     music = false
+    wifi = false
+    bluetooth = false
     osd = false
   }
 

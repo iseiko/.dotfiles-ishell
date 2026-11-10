@@ -16,12 +16,27 @@ Singleton {
   readonly property string next:      String.fromCodePoint(0xF04AD)
   readonly property string music:     String.fromCodePoint(0xF075A)
 
+  readonly property string bluetooth:          String.fromCodePoint(0xF00AF)
+  readonly property string bluetoothConnected: String.fromCodePoint(0xF00B1)
+  readonly property string bluetoothOff:       String.fromCodePoint(0xF00B2)
+  readonly property string wifiOff:            String.fromCodePoint(0xF05AA)   // radio turned off
+  readonly property string wifiNone:           String.fromCodePoint(0xF092E)   // on, but not connected
+  readonly property string ethernet:           String.fromCodePoint(0xF0200)
+
   // ---- Icons that change with the level -------------------------------------
   function volume(level, muted) {
     if (muted || level <= 0) return String.fromCodePoint(0xF075F)   // muted
     if (level < 0.34)        return String.fromCodePoint(0xF057F)   // low
     if (level < 0.67)        return String.fromCodePoint(0xF0580)   // medium
     return String.fromCodePoint(0xF057E)                            // high
+  }
+
+  // strength: 0 to 1
+  function wifi(strength) {
+    if (strength < 0.3) return String.fromCodePoint(0xF091F)
+    if (strength < 0.55) return String.fromCodePoint(0xF0922)
+    if (strength < 0.8) return String.fromCodePoint(0xF0925)
+    return String.fromCodePoint(0xF0928)
   }
 
   function brightness(level) {

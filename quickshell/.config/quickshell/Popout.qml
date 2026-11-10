@@ -28,6 +28,11 @@ Item {
   y: attachY - height
   visible: shown || progress > 0
 
+  // Smooth growth when a list gets longer or shorter
+  Behavior on fullHeight {
+    NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+  }
+
   Behavior on progress {
     NumberAnimation {
       id: anim

@@ -43,6 +43,15 @@ Scope {
     function previous(): void { if (Media.player) Media.player.previous() }
   }
 
+  IpcHandler {
+    target: "wifi"
+    function toggle(): void { Visibilities.toggle("wifi") }
+  }
+  IpcHandler {
+    target: "bluetooth"
+    function toggle(): void { Visibilities.toggle("bluetooth") }
+  }
+
   // Volume and brightness. Keybinds can call these, e.g. `qs ipc call osd volumeUp`
   IpcHandler {
     target: "osd"
@@ -82,7 +91,9 @@ Scope {
       Region { item: powerPopout },
       Region { item: musicPopout },
       Region { item: notifPopout },
-      Region { item: osdPopout }
+      Region { item: osdPopout },
+      Region { item: wifiPopout },
+      Region { item: bluetoothPopout }
     ]
   }
 
@@ -186,6 +197,31 @@ Scope {
         x: scene.width - Theme.border - width
 
         OsdPopup { id: osdContent; anchors.fill: parent }
+      }
+
+      // Wi-Fi and Bluetooth: bottom-right corner, same place as the power menu
+      Popout {
+        id: wifiPopout
+        attachY: scene.barTop
+        attachRight: true
+        shown: Visibilities.wifi
+        fullWidth: wifiContent.implicitWidth
+        fullHeight: Math.min(wifiContent.implicitHeight, scene.barTop - Theme.border - 24)
+        x: scene.width - Theme.border - width
+
+        WifiPopup { id: wifiContent; anchors.fill: parent }
+      }
+
+      Popout {
+        id: bluetoothPopout
+        attachY: scene.barTop
+        attachRight: true
+        shown: Visibilities.bluetooth
+        fullWidth: bluetoothContent.implicitWidth
+        fullHeight: Math.min(bluetoothContent.implicitHeight, scene.barTop - Theme.border - 24)
+        x: scene.width - Theme.border - width
+
+        BluetoothPopup { id: bluetoothContent; anchors.fill: parent }
       }
 
       // ---- The bar, on top of everything ----

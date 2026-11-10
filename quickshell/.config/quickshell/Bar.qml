@@ -1,5 +1,6 @@
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import QtQuick
 
@@ -8,6 +9,9 @@ Item {
   id: root
 
   readonly property var battery: UPower.displayDevice
+
+  readonly property var btAdapter: Bluetooth.defaultAdapter
+  readonly property var btConnected: Bluetooth.devices.values.filter(d => d.connected)
 
   readonly property bool charging: battery.state === UPowerDeviceState.Charging
                                 || battery.state === UPowerDeviceState.FullyCharged
@@ -190,6 +194,39 @@ Item {
   Row {
     anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 12 }
     spacing: 16
+
+    // Wi-Fi: click = open the panel, right click = turn Wi-Fi on or off
+    BarModule {
+      icon: Wifi.wired && !Wifi.connected ? Icons.ethernet
+          : !Wifi.enabled ? Icons.wifiOff
+          : Wifi.connected ? Icons.wifi(Wifi.strength) : Icons.wifiNone
+      iconColor: (Wifi.enabled && Wifi.connected) || Wifi.wired ? Theme.accent : Theme.muted
+      label: Wifi.wired && !Wifi.connected ? "Ethernet"
+           : !Wifi.enabled ? "Wi-Fi - off"
+           : Wifi.connected ? "Wi-Fi - " + Wifi.ssid : "Wi-Fi - not connected"
+      active: Visibilities.wifi
+      onClicked: button => {
+        if (button === Qt.RightButton) Wifi.setEnabled(!Wifi.enabled)
+        else Visibilities.toggle("wifi")
+      }
+    }
+
+    // Bluetooth: click = open the panel, right click = turn Bluetooth on or off.
+    // Hidden when the computer has no Bluetooth adapter.
+    BarModule {
+      visible: root.btAdapter !== null
+      icon: !root.btAdapter || !root.btAdapter.enabled ? Icons.bluetoothOff
+          : root.btConnected.length > 0 ? Icons.bluetoothConnected : Icons.bluetooth
+      iconColor: root.btAdapter && root.btAdapter.enabled ? Theme.accent : Theme.muted
+      label: !root.btAdapter || !root.btAdapter.enabled ? "Bluetooth - off"
+           : root.btConnected.length > 0 ? "Bluetooth - " + root.btConnected.map(d => d.name).join(", ")
+           : "Bluetooth - on"
+      active: Visibilities.bluetooth
+      onClicked: button => {
+        if (button === Qt.RightButton) root.btAdapter.enabled = !root.btAdapter.enabled
+        else Visibilities.toggle("bluetooth")
+      }
+    }
 
     // Volume: click = open the panel, right click = mute, scroll = change
     BarModule {

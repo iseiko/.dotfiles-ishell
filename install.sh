@@ -54,3 +54,7 @@ stow -t ~ kitty
 stow -t ~ matugen 
 stow -t ~ quickshell
 stow -t ~ zsh
+
+# Reboot system
+
+sudo systemctl soft-reboot

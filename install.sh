@@ -51,6 +51,9 @@ rm -r hypr zsh kitty matugen quickshell
 cd ~/.dotfiles-ishell
 stow -t ~ hypr 
 stow -t ~ kitty
+cd ~/.config/kitty 
+python3 shell-colors.py
+cd ~/.dotfiles-ishell
 stow -t ~ matugen 
 stow -t ~ quickshell
 stow -t ~ zsh

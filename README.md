@@ -65,8 +65,6 @@ sudo pacman -S hyprland zsh fzf
 paru -S quickshell-git matugen-bin oh-my-posh-bin awww   # or your AUR helper of choice
 ```
 
-<!-- TODO: list anything else you use (terminal, wallpaper daemon like swww/awww/hyprpaper, notification daemon, fonts, etc.) -->
-
 > Hyprland **0.55 or newer** is required, since the config uses the Lua API (`hl.*`) instead of hyprlang.
 
 <h2 align='center'>Installation</h2>
@@ -92,15 +90,12 @@ Then point zsh at the config directory by adding this to `~/.zshenv`:
 export ZDOTDIR="$HOME/.config/zsh"
 ```
 
-<!-- TODO: adjust if your .zshrc lives elsewhere or you source the files differently -->
-
 You can also manage the symlinks with [GNU Stow](https://www.gnu.org/software/stow/) if you prefer.
 
 <h2 align='center'>Usage</h2>
 
 <h3 align='center'>Wallpaper and colors</h3>
 
-<!-- TODO: describe how a wallpaper change triggers matugen, e.g.: -->
 
 ```sh
 matugen image /path/to/wallpaper.png
@@ -138,17 +133,17 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
     
 <h2 align='center'>To Do</h2>
 
-[ ] Add icons to the main bar
+[X] Add icons to the main bar
 
 [ ] Fix wallpaper rounding on wallpaper chooser script
 
-[ ] Fix animation of the app launcher
+[ ] Add calendar
+
+[X] Fix animation of the app launcher
 
 [ ] Add bluetooth and wifi connection center
 
-[ ] Add bluetooth and wifi to the bar
-
-[ ] Add scrolling layout 
+[ ] Add bluetooth and wifi to the bar 
 
 
 <h2 align='center'>Credits</h2>

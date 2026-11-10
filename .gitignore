@@ -2,5 +2,4 @@ zsh/.config/zsh/plugins
 quickshell/.config/quickshell/temp.qml
 quickshell/.config/quickshell/colors.json
 kitty/.config/kitty/shell-colors.conf
-kitty/.config/kitty/shell-colors.py
 hypr/.config/hypr/matugen-colors.lua

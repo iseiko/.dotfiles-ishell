@@ -29,10 +29,10 @@ Item {
   RoundedImage {
     anchors.fill: parent
     radius: Theme.popoutRounding
-    squareBottom: true
+    squareBottom: false
     source: Media.artUrl
-    blurAmount: 1
-    opacity: 0.35
+    blurAmount: 2.1
+    opacity: 0.1
   }
 
   Column {

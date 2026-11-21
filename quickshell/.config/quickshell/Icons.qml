@@ -23,6 +23,20 @@ Singleton {
   readonly property string wifiNone:           String.fromCodePoint(0xF092E)   // on, but not connected
   readonly property string ethernet:           String.fromCodePoint(0xF0200)
 
+  readonly property string chevronRight: String.fromCodePoint(0xF0142)
+  readonly property string arrowLeft:    String.fromCodePoint(0xF004D)
+
+  // Icons by name, used by the entries of menu.json ("icon": "wifi")
+  function named(name) {
+    const codes = {
+      apps: 0xF003B, clipboard: 0xF0192, wallpaper: 0xF02E9, keyboard: 0xF030C, settings: 0xF0493,
+      install: 0xF01DA, update: 0xF0450, power: 0xF0425, lock: 0xF033E,
+      suspend: 0xF0904, hibernate: 0xF02CA, reboot: 0xF0709,
+      wifi: 0xF0928, bluetooth: 0xF00AF, music: 0xF075A
+    }
+    return codes[name] ? String.fromCodePoint(codes[name]) : "\u2022"
+  }
+
   // ---- Icons that change with the level -------------------------------------
   function volume(level, muted) {
     if (muted || level <= 0) return String.fromCodePoint(0xF075F)   // muted

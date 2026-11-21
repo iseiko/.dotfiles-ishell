@@ -1,0 +1,91 @@
+{
+  "categories": [
+    {
+      "name": "Windows",
+      "binds": [
+        {
+          "keys": [
+            "SUPER",
+            "Q"
+          ],
+          "desc": "Close window"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "F"
+          ],
+          "desc": "Fullscreen"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "V"
+          ],
+          "desc": "Toggle floating"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "Arrows"
+          ],
+          "desc": "Move focus"
+        }
+      ]
+    },
+    {
+      "name": "Workspaces",
+      "binds": [
+        {
+          "keys": [
+            "SUPER",
+            "1-5"
+          ],
+          "desc": "Go to workspace"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "SHIFT",
+            "1-5"
+          ],
+          "desc": "Move window to workspace"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "S"
+          ],
+          "desc": "Special workspace"
+        }
+      ]
+    },
+    {
+      "name": "Shell",
+      "binds": [
+        {
+          "keys": [
+            "SUPER",
+            "SPACE"
+          ],
+          "desc": "App launcher"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "ALT",
+            "SPACE"
+          ],
+          "desc": "Main menu"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "K"
+          ],
+          "desc": "Keybinds"
+        }
+      ]
+    }
+  ]
+}

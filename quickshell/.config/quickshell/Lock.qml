@@ -57,7 +57,7 @@ Scope {
 
     // This is instantiated once per monitor
     WlSessionLockSurface {
-      color: Theme.base
+      color: "transparent" 
 
       Item {
         anchors.fill: parent

@@ -26,3 +26,10 @@ hl.gesture({
     direction = "horizontal",
     action = "workspace"
 })
+
+hl.gesture({
+  fingers = 3,
+  direction = "vertical",
+  action = "special",
+  workspace_name = "magic"
+})

@@ -16,6 +16,7 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("zen-browser"))
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exec_cmd("qs ipc call music toggle"))
+hl.bind(mainMod .. " + ALT + SPACE", hl.dsp.exec_cmd("qs ipc call menu toggle"))
 
 -- Actions
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
@@ -25,6 +26,7 @@ hl.bind(mainMod .. " + END", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null
 hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("qs ipc call picker toggle"))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("qs ipc call lock lock"))
 hl.bind("XF86PowerOff", hl.dsp.exec_cmd("qs ipc call power toggle"))
+hl.bind("SUPER + SHIFT + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 
 -- Focus 
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
@@ -71,3 +73,18 @@ hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_S
 -- Brightness
 hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
+
+---------------- 
+-- Screenshot --
+----------------
+-- local shot ="zsh" ..  "~/.config/quickshell/scripts/screenshot.sh"
+local shot = "zsh " .. os.getenv("HOME") .. "/.config/quickshell/scripts/screenshot.sh"
+
+-- Área: salva e copia
+hl.bind("Print", hl.dsp.exec_cmd(shot .. " region ask"))
+-- Área: só copia para o clipboard
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd(shot .. " region clip"))
+-- Tela inteira: salva e copia
+hl.bind("SUPER + Print", hl.dsp.exec_cmd(shot .. " screen"))
+-- Uma janela: salva e copia
+hl.bind("ALT + Print", hl.dsp.exec_cmd(shot .. " window"))

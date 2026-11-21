@@ -27,6 +27,28 @@ Item {
     return musicChip.mapToItem(root, musicChip.width / 2, 0).x
   }
 
+  // True while the special workspace (scratchpad) is open on the focused monitor.
+  // Hyprland sends "activespecial>>NAME,MONITOR" when it opens, and an empty NAME when it closes.
+  property bool specialOpen: false
+
+  Connections {
+    target: Hyprland
+    function onRawEvent(event) {
+      if (event.name !== "activespecial") return
+      const args = event.parse(2)   // [workspace name, monitor name]
+      const monitor = Hyprland.focusedMonitor
+      if (monitor && args[1] !== monitor.name) return   // another screen, ignore
+      root.specialOpen = args[0] !== ""
+    }
+  }
+
+  // The special workspace may already be open when the shell starts
+  Component.onCompleted: {
+    const monitor = Hyprland.focusedMonitor
+    const special = monitor && monitor.lastIpcObject ? monitor.lastIpcObject.specialWorkspace : null
+    if (special && special.name) specialOpen = true
+  }
+
   SystemClock {
     id: clock
     precision: SystemClock.Minutes
@@ -76,7 +98,7 @@ Item {
 
           Text {
             anchors.centerIn: parent
-            text: parent.wsId
+            text: parent.active && root.specialOpen ? "S" : parent.wsId
             color: parent.active ? Theme.base : Theme.text
             font.pixelSize: 14
             font.bold: parent.active

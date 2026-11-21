@@ -43,6 +43,26 @@ Scope {
     function previous(): void { if (Media.player) Media.player.previous() }
   }
 
+  // The main menu and the keybinds panel: `qs ipc call menu toggle`, `qs ipc call keybinds toggle`
+  // Called by scripts/screenshot.sh once the picture is taken
+  IpcHandler {
+    target: "screenshot"
+    function show(path: string, mode: string): void { Screenshot.show(path, mode) }
+  }
+
+  // The clipboard history: `qs ipc call clipboard toggle`
+  IpcHandler {
+    target: "clipboard"
+    function toggle(): void { Visibilities.toggle("clipboard") }
+  }
+  IpcHandler {
+    target: "menu"
+    function toggle(): void { Visibilities.toggle("menu") }
+  }
+  IpcHandler {
+    target: "keybinds"
+    function toggle(): void { Visibilities.toggle("keybinds") }
+  }
   IpcHandler {
     target: "wifi"
     function toggle(): void { Visibilities.toggle("wifi") }
@@ -93,7 +113,11 @@ Scope {
       Region { item: notifPopout },
       Region { item: osdPopout },
       Region { item: wifiPopout },
-      Region { item: bluetoothPopout }
+      Region { item: bluetoothPopout },
+      Region { item: menuPopout },
+      Region { item: keybindsPopout },
+      Region { item: clipboardPopout },
+      Region { item: screenshotPopout }
     ]
   }
 
@@ -222,6 +246,54 @@ Scope {
         x: scene.width - Theme.border - width
 
         BluetoothPopup { id: bluetoothContent; anchors.fill: parent }
+      }
+
+      // The main menu: a drawer from the bar, like the app launcher
+      Popout {
+        id: menuPopout
+        attachY: scene.barTop
+        shown: Visibilities.menu
+        fullWidth: menuContent.implicitWidth
+        fullHeight: Math.min(menuContent.implicitHeight, scene.barTop - Theme.border - 24)
+        x: (scene.width - width) / 2
+
+        MenuPopup { id: menuContent; anchors.fill: parent }
+      }
+
+      // A screenshot waiting to be saved or copied: a drawer from the bar
+      Popout {
+        id: screenshotPopout
+        attachY: scene.barTop
+        shown: Visibilities.screenshot
+        fullWidth: screenshotContent.implicitWidth
+        fullHeight: Math.min(screenshotContent.implicitHeight, scene.barTop - Theme.border - 24)
+        x: (scene.width - width) / 2
+
+        ScreenshotPopup { id: screenshotContent; anchors.fill: parent }
+      }
+
+      // The clipboard history: a drawer from the bar, like the app launcher
+      Popout {
+        id: clipboardPopout
+        attachY: scene.barTop
+        shown: Visibilities.clipboard
+        fullWidth: clipboardContent.implicitWidth
+        fullHeight: Math.min(clipboardContent.implicitHeight, scene.barTop - Theme.border - 24)
+        x: (scene.width - width) / 2
+
+        ClipboardPopup { id: clipboardContent; anchors.fill: parent }
+      }
+
+      // The keybinds: a drawer from the bar, in the same place as the main menu
+      Popout {
+        id: keybindsPopout
+        attachY: scene.barTop
+        shown: Visibilities.keybinds
+        fullWidth: keybindsContent.implicitWidth
+        fullHeight: Math.min(640, scene.barTop - Theme.border - 24)
+        x: (scene.width - width) / 2
+
+        KeybindsPopup { id: keybindsContent; anchors.fill: parent }
       }
 
       // ---- The bar, on top of everything ----

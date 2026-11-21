@@ -1,0 +1,92 @@
+{
+  "items": [
+    {
+      "label": "Apps",
+      "icon": "apps",
+      "open": "launcher"
+    },
+    {
+      "label": "Clipboard",
+      "icon": "clipboard",
+      "open": "clipboard"
+    },
+    {
+      "label": "Wallpaper",
+      "icon": "wallpaper",
+      "open": "picker"
+    },
+    {
+      "label": "Keybinds",
+      "icon": "keyboard",
+      "open": "keybinds"
+    },
+    {
+      "label": "Settings",
+      "icon": "settings",
+      "submenu": [
+        {
+          "label": "Wi-Fi",
+          "icon": "wifi",
+          "open": "wifi"
+        },
+        {
+          "label": "Bluetooth",
+          "icon": "bluetooth",
+          "open": "bluetooth"
+        }
+      ]
+    },
+    {
+      "label": "Install",
+      "icon": "install",
+      "submenu": [
+        {
+          "label": "Package from the official repos",
+          "icon": "install",
+          "command": "kitty --class shell-installer --title Install -e bash ~/.config/quickshell/scripts/install-package.sh"
+        },
+        {
+          "label": "Package from the AUR",
+          "icon": "install",
+          "command": "kitty --class shell-installer --title Install -e bash ~/.config/quickshell/scripts/install-package.sh aur"
+        }
+      ]
+    },
+    {
+      "label": "Update system",
+      "icon": "update",
+      "command": "kitty --class shell-installer --title Update -e bash -c 'sudo pacman -Syu; echo; read -rp \"Press Enter to close\"'"
+    },
+    {
+      "label": "System",
+      "icon": "power",
+      "submenu": [
+        {
+          "label": "Lock",
+          "icon": "lock",
+          "command": "qs ipc call lock lock"
+        },
+        {
+          "label": "Suspend",
+          "icon": "suspend",
+          "command": "systemctl suspend"
+        },
+        {
+          "label": "Hibernate",
+          "icon": "hibernate",
+          "command": "systemctl hibernate"
+        },
+        {
+          "label": "Reboot",
+          "icon": "reboot",
+          "command": "systemctl soft-reboot"
+        },
+        {
+          "label": "Shutdown",
+          "icon": "power",
+          "command": "systemctl poweroff"
+        }
+      ]
+    }
+  ]
+}

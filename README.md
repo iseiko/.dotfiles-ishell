@@ -19,34 +19,56 @@
 ```
 .config/
 ├── hypr/
-│   ├── hyprland.lua          # entry point, loads the modules below
-│   ├── matugen-colors.lua    # generated colors (matugen output)
-│   ├── theme.lua             # theme loader
+│   ├── hyprland.lua            # entry point, loads the modules below
+│   ├── matugen-colors.lua      # generated colors (matugen output)
+│   ├── theme.lua               # theme loader
 │   └── modules/
-│       ├── binds.lua         # keybinds
-│       ├── inputs.lua        # keyboard / mouse / touchpad
-│       ├── looknfeel.lua     # gaps, borders, rounding, animations
-│       ├── monitors.lua      # monitor layout
-│       └── winrules.lua      # window rules
+│       ├── binds.lua           # keybinds
+│       ├── inputs.lua          # keyboard / mouse / touchpad
+│       ├── looknfeel.lua       # gaps, borders, rounding, animations
+│       ├── monitors.lua        # monitor layout
+│       └── winrules.lua        # window rules
 ├── quickshell/
-│   ├── shell.qml             # entry point
-│   ├── Bar.qml               # status bar
-│   ├── AppLauncher.qml       # app launcher
-│   ├── PowerMenu.qml         # power / session menu
-│   ├── Lock.qml              # lock screen (PAM)
-│   ├── WallpaperPicker.qml   # wallpaper picker
-│   ├── Theme.qml             # theme singleton
-│   ├── colors.json           # generated colors (matugen output)
-│   └── pam/password.conf     # PAM config used by the lock screen
+│   ├── Audio.qml               # audio osd notification
+│   ├── Bar.qml                 # status bar
+│   ├── BarModule.qml           # holds the modules located on the main bar
+│   ├── BluetoothPopup.qml      # manages the bluetooth module on the shell
+│   ├── BluetoothRow.qml        # 
+│   ├── Brightness.qml          #
+│   ├── colors.json             # generated colors (matugen output)
+│   ├── Drawers.qml             #
+│   ├── Icons.qml               #
+│   ├── LauncherPopup.qml       #
+│   ├── Lock.qml                # lock screen (PAM)
+│   ├── Media.qml               #
+│   ├── MusicPopup.qml          #
+│   ├── NotificationsPopup.qml  #
+│   ├── Osd.qml                 #
+│   ├── OsdPopup.qml            #
+│   ├── OsdSlider.qml           #
+│   ├── pam/password.conf       # PAM config used by the lock screen
+│   ├── Popout.qml              # 
+│   ├── PowerPopout.qml         # 
+│   ├── RoundedImage.qml        #
+│   ├── ScreenFrame.qml         #
+│   ├── shell.qml               # entry point
+│   ├── SmallButton.qml         #
+│   ├── SwitchButton.qml        #
+│   ├── Theme.qml               # theme singleton
+│   ├── TopPopout.qml           #
+│   ├── Visibilities.qml        #
+│   ├── WallpaperPopout.qml     #
+│   ├── Wifi.qml                #
+│   └── WifiPopout.qml          # 
 └── zsh/
     ├── aliases.zsh
     ├── bindings.zsh
     ├── fzf.zsh
     ├── prompt.zsh
-    ├── omp.yaml              # oh-my-posh prompt theme
-    ├── plugins.zsh           # plugin loader
-    └── plugins/              # fast-syntax-highlighting, zsh-autosuggestions,
-                              # zsh-history-substring-search, zsh-vi-mode
+    ├── omp.yaml                # oh-my-posh prompt theme
+    ├── plugins.zsh             # plugin loader
+    └── plugins/                # fast-syntax-highlighting, zsh-autosuggestions,
+                                # zsh-history-substring-search, zsh-vi-mode
 ```
 
 <h2 align='center'>Features</h2>
@@ -70,27 +92,13 @@ paru -S quickshell-git matugen-bin oh-my-posh-bin awww   # or your AUR helper of
 <h2 align='center'>Installation</h2>
 
 ```sh
-git clone https://github.com/<user>/<repo>.git ~/dotfiles
-cd ~/dotfiles
 
-# back up existing configs first
-mv ~/.config/hypr ~/.config/hypr.bak
-mv ~/.config/quickshell ~/.config/quickshell.bak
-mv ~/.config/zsh ~/.config/zsh.bak
+git clone https://github.com/iseiko/.dotfiles-ishell.git 
+cd ~/dotfiles-ishell
 
-# symlink
-ln -s ~/dotfiles/.config/hypr       ~/.config/hypr
-ln -s ~/dotfiles/.config/quickshell ~/.config/quickshell
-ln -s ~/dotfiles/.config/zsh        ~/.config/zsh
+sh ./install.sh
+
 ```
-
-Then point zsh at the config directory by adding this to `~/.zshenv`:
-
-```sh
-export ZDOTDIR="$HOME/.config/zsh"
-```
-
-You can also manage the symlinks with [GNU Stow](https://www.gnu.org/software/stow/) if you prefer.
 
 <h2 align='center'>Usage</h2>
 
@@ -133,17 +141,17 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
     
 <h2 align='center'>To Do</h2>
 
-[X] Add icons to the main bar
+[X] Fix wallpaper rounding on wallpaper chooser script
 
-[ ] Fix wallpaper rounding on wallpaper chooser script
+[ ] Add calendar on the mains clock 
 
-[ ] Add calendar
+[ ] Add power-profiles configuration tlpctl
 
-[X] Fix animation of the app launcher
+[ ] Add icon tray for background apps
 
-[ ] Add bluetooth and wifi connection center
+[ ] Fix animations
 
-[ ] Add bluetooth and wifi to the bar 
+[ ] Configure lockscreen
 
 
 <h2 align='center'>Credits</h2>

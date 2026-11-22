@@ -141,17 +141,19 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
     
 <h2 align='center'>To Do</h2>
 
-[X] Fix wallpaper rounding on wallpaper chooser script
+[ ] Fix wallpaper rounding on wallpaper chooser script
 
 [X] Add calendar on the mains clock 
 
 [ ] Add power-profiles configuration tlpctl
 
-[ ] Add icon tray for background apps
+[X] Add icon tray for background apps
 
 [X] Fix animations
 
 [ ] Configure lockscreen
+
+[X] Add logout option
 
 
 <h2 align='center'>Credits</h2>

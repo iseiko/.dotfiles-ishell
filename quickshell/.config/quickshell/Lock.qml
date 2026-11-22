@@ -115,16 +115,16 @@ Scope {
           to: 1
           duration: 950
           easing.type: Easing.BezierSpline
-          easing.bezierCurve: [0.05, 0.7, 0.1, 1.0, 1.0, 1.0]
+          easing.bezierCurve: [0.03, 0.5, 0.1, 1.0, 1.0, 1.0]
         }
         NumberAnimation {
           id: unlockAnim
           target: content
           property: "p"
           to: 0
-          duration: 520
+          duration: 350
           easing.type: Easing.BezierSpline
-          easing.bezierCurve: [0.3, 0.0, 0.8, 0.15, 1.0, 1.0]
+          easing.bezierCurve: [0.4, 0.5, 0.6, 0.7, 1.0, 1.0]
         }
 
         // Everything that is not the clock appears in the second half of the animation
@@ -205,9 +205,9 @@ Scope {
           anchors.fill: parent
           opacity: content.p
           gradient: Gradient {
-            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.30) }
-            GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.18) }
-            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.45) }
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.45) }
+            GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.35) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.55) }
           }
         }
 

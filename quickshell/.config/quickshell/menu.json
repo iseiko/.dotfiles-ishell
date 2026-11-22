@@ -11,6 +11,11 @@
       "open": "clipboard"
     },
     {
+      "label": "Calendar",
+      "icon": "calendar",
+      "open": "calendar"
+    },
+    {
       "label": "Wallpaper",
       "icon": "wallpaper",
       "open": "picker"

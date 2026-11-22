@@ -19,8 +19,7 @@ Singleton {
     path = file
     mode = captureMode || "region"
     pending = true
-    Visibilities.closeAll()
-    Visibilities.screenshot = true
+    Visibilities.open("screenshot")
   }
 
   // Save and/or copy the picture, then close the panel

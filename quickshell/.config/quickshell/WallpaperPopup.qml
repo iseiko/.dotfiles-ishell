@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick.Effects
 import Qt.labs.folderlistmodel
 
 // The wallpaper picker (content of its popout)
@@ -62,7 +61,7 @@ Item {
     Keys.onRightPressed: incrementCurrentIndex()
     Keys.onReturnPressed: root.select(currentItem ? currentItem.filePath : "")
     Keys.onEnterPressed: root.select(currentItem ? currentItem.filePath : "")
-    Keys.onEscapePressed: Visibilities.closeAll()
+    Keys.onEscapePressed: Visibilities.back()
 
     model: FolderListModel {
       folder: "file://" + root.wallDir
@@ -71,41 +70,21 @@ Item {
     }
 
     delegate: Rectangle {
-      id: delegateRoot
       required property string filePath
       readonly property bool selected: ListView.isCurrentItem
 
       width: 240
       height: ListView.view.height
       radius: 10
+      clip: true
       color: Theme.surface
 
       Image {
-        id: wallImage
         anchors.fill: parent
         source: "file://" + parent.filePath
         sourceSize.width: 480
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
-        visible: false
-      }
-
-      MultiEffect {
-        source: wallImage
-        anchors.fill: wallImage
-        maskEnabled: true
-        maskSource: maskRect
-        maskThresholdMin: 0.5
-        maskSpreadAtMin: 1.0
-      }
-
-      Rectangle {
-        id: maskRect
-        width: wallImage.width
-        height: wallImage.height
-        radius: delegateRoot.radius
-        visible: false
-        layer.enabled: true
       }
 
       // Selection highlight, drawn ABOVE the image

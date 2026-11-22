@@ -55,6 +55,11 @@ Scope {
     target: "clipboard"
     function toggle(): void { Visibilities.toggle("clipboard") }
   }
+  // The calendar: `qs ipc call calendar toggle`
+  IpcHandler {
+    target: "calendar"
+    function toggle(): void { Visibilities.toggle("calendar") }
+  }
   IpcHandler {
     target: "menu"
     function toggle(): void { Visibilities.toggle("menu") }
@@ -75,12 +80,14 @@ Scope {
   // Volume and brightness. Keybinds can call these, e.g. `qs ipc call osd volumeUp`
   IpcHandler {
     target: "osd"
-    function show(): void { Osd.show() }
+    function show(): void { Osd.open() }
     function volumeUp(): void { Audio.changeVolume(0.05) }
     function volumeDown(): void { Audio.changeVolume(-0.05) }
     function volumeMute(): void { Audio.toggleMute() }
     function brightnessUp(): void { Brightness.change(5) }
     function brightnessDown(): void { Brightness.change(-5) }
+    function nightlight(): void { Hyprsunset.toggle() }
+    function nightToggle(): void { Night.toggle() }
   }
 
   // Remember where the music chip is whenever the music popup opens
@@ -106,18 +113,8 @@ Scope {
       Region { x: 0; y: 0; width: Theme.border; height: win.height },
       Region { x: win.width - Theme.border; y: 0; width: Theme.border; height: win.height },
       Region { x: 0; y: win.height - Theme.barHeight; width: win.width; height: Theme.barHeight },
-      Region { item: launcherPopout },
-      Region { item: pickerPopout },
-      Region { item: powerPopout },
-      Region { item: musicPopout },
-      Region { item: notifPopout },
-      Region { item: osdPopout },
-      Region { item: wifiPopout },
-      Region { item: bluetoothPopout },
-      Region { item: menuPopout },
-      Region { item: keybindsPopout },
-      Region { item: clipboardPopout },
-      Region { item: screenshotPopout }
+      Region { item: mainPanel },
+      Region { item: notifPopout }
     ]
   }
 
@@ -150,52 +147,54 @@ Scope {
         onClicked: Visibilities.closeAll()
       }
 
-      // ---- Popups (they are drawn under the bar so the bar's buttons stay visible) ----
-
-      Popout {
-        id: launcherPopout
+      // ---- Popups (drawn under the bar so the bar's buttons stay visible) ----
+      //
+      // Every popup is a page of ONE panel. Opening another popup makes the panel move and change
+      // shape into it (wherever it is), instead of closing and opening again.
+      MorphPopout {
+        id: mainPanel
+        current: Visibilities.page
+        attachX: scene.width - Theme.border
         attachY: scene.barTop
-        shown: Visibilities.launcher
-        fullWidth: 600
-        fullHeight: Math.min(650, scene.barTop - Theme.border - 24)
-        x: (scene.width - width) / 2
+        sceneWidth: scene.width
+        inset: scene.inset
+        maxHeight: scene.barTop - Theme.border - 24
 
-        LauncherPopup { anchors.fill: parent }
-      }
+        // In the bottom-right corner, against the frame
+        MorphPage { panel: mainPanel; name: "wifi"; corner: true; WifiPopup { anchors.fill: parent } }
+        MorphPage { panel: mainPanel; name: "bluetooth"; corner: true; BluetoothPopup { anchors.fill: parent } }
+        MorphPage { panel: mainPanel; name: "osd"; corner: true; OsdPopup { anchors.fill: parent } }
+        MorphPage { panel: mainPanel; name: "power"; corner: true; PowerPopup { anchors.fill: parent } }
+        MorphPage { panel: mainPanel; name: "traymenu"; corner: true; TrayMenuPopup { anchors.fill: parent } }
 
-      Popout {
-        id: pickerPopout
-        attachY: scene.barTop
-        shown: Visibilities.picker
-        fullWidth: Math.min(1100, scene.width - scene.inset * 2)
-        fullHeight: 200
-        x: (scene.width - width) / 2
+        // Drawers from the bar, in the middle
+        MorphPage {
+          panel: mainPanel; name: "launcher"
+          LauncherPopup { anchors.fill: parent; implicitWidth: 600; implicitHeight: 650 }
+        }
+        MorphPage { panel: mainPanel; name: "menu"; MenuPopup { anchors.fill: parent } }
+        MorphPage { panel: mainPanel; name: "clipboard"; ClipboardPopup { anchors.fill: parent } }
+        MorphPage {
+          panel: mainPanel; name: "keybinds"
+          KeybindsPopup { anchors.fill: parent; implicitHeight: 640 }
+        }
+        MorphPage { panel: mainPanel; name: "screenshot"; ScreenshotPopup { anchors.fill: parent } }
+        MorphPage { panel: mainPanel; name: "calendar"; CalendarPopup { anchors.fill: parent } }
+        MorphPage {
+          panel: mainPanel; name: "picker"
+          WallpaperPopup {
+            anchors.fill: parent
+            implicitWidth: Math.min(1100, scene.width - scene.inset * 2)
+            implicitHeight: 200
+          }
+        }
 
-        WallpaperPopup { anchors.fill: parent }
-      }
-
-      Popout {
-        id: powerPopout
-        attachY: scene.barTop
-        shown: Visibilities.power
-        fullWidth: powerContent.implicitWidth
-        fullHeight: powerContent.implicitHeight
-        attachRight: true                           // touches the right border and the bar
-        x: scene.width - Theme.border - width
-
-        PowerPopup { id: powerContent; anchors.fill: parent }
-      }
-
-      Popout {
-        id: musicPopout
-        attachY: scene.barTop
-        shown: Visibilities.music
-        fullWidth: musicContent.implicitWidth
-        fullHeight: musicContent.implicitHeight
-        x: Math.max(scene.inset, Math.min(Visibilities.musicAnchorX - width / 2,
-                                          scene.width - width - scene.inset))
-
-        MusicPopup { id: musicContent; anchors.fill: parent }
+        // Above its icon in the bar
+        MorphPage {
+          panel: mainPanel; name: "music"
+          anchorX: Visibilities.musicAnchorX
+          MusicPopup { anchors.fill: parent }
+        }
       }
 
       // Notifications: hang from the top border in the top-right corner
@@ -208,92 +207,6 @@ Scope {
         x: scene.width - Theme.border - width
 
         NotificationsPopup { id: notifs; anchors.fill: parent }
-      }
-
-      // Volume and brightness: bottom-right corner, same place as the power menu
-      Popout {
-        id: osdPopout
-        attachY: scene.barTop
-        attachRight: true
-        shown: Visibilities.osd
-        fullWidth: osdContent.implicitWidth
-        fullHeight: osdContent.implicitHeight
-        x: scene.width - Theme.border - width
-
-        OsdPopup { id: osdContent; anchors.fill: parent }
-      }
-
-      // Wi-Fi and Bluetooth: bottom-right corner, same place as the power menu
-      Popout {
-        id: wifiPopout
-        attachY: scene.barTop
-        attachRight: true
-        shown: Visibilities.wifi
-        fullWidth: wifiContent.implicitWidth
-        fullHeight: Math.min(wifiContent.implicitHeight, scene.barTop - Theme.border - 24)
-        x: scene.width - Theme.border - width
-
-        WifiPopup { id: wifiContent; anchors.fill: parent }
-      }
-
-      Popout {
-        id: bluetoothPopout
-        attachY: scene.barTop
-        attachRight: true
-        shown: Visibilities.bluetooth
-        fullWidth: bluetoothContent.implicitWidth
-        fullHeight: Math.min(bluetoothContent.implicitHeight, scene.barTop - Theme.border - 24)
-        x: scene.width - Theme.border - width
-
-        BluetoothPopup { id: bluetoothContent; anchors.fill: parent }
-      }
-
-      // The main menu: a drawer from the bar, like the app launcher
-      Popout {
-        id: menuPopout
-        attachY: scene.barTop
-        shown: Visibilities.menu
-        fullWidth: menuContent.implicitWidth
-        fullHeight: Math.min(menuContent.implicitHeight, scene.barTop - Theme.border - 24)
-        x: (scene.width - width) / 2
-
-        MenuPopup { id: menuContent; anchors.fill: parent }
-      }
-
-      // A screenshot waiting to be saved or copied: a drawer from the bar
-      Popout {
-        id: screenshotPopout
-        attachY: scene.barTop
-        shown: Visibilities.screenshot
-        fullWidth: screenshotContent.implicitWidth
-        fullHeight: Math.min(screenshotContent.implicitHeight, scene.barTop - Theme.border - 24)
-        x: (scene.width - width) / 2
-
-        ScreenshotPopup { id: screenshotContent; anchors.fill: parent }
-      }
-
-      // The clipboard history: a drawer from the bar, like the app launcher
-      Popout {
-        id: clipboardPopout
-        attachY: scene.barTop
-        shown: Visibilities.clipboard
-        fullWidth: clipboardContent.implicitWidth
-        fullHeight: Math.min(clipboardContent.implicitHeight, scene.barTop - Theme.border - 24)
-        x: (scene.width - width) / 2
-
-        ClipboardPopup { id: clipboardContent; anchors.fill: parent }
-      }
-
-      // The keybinds: a drawer from the bar, in the same place as the main menu
-      Popout {
-        id: keybindsPopout
-        attachY: scene.barTop
-        shown: Visibilities.keybinds
-        fullWidth: keybindsContent.implicitWidth
-        fullHeight: Math.min(640, scene.barTop - Theme.border - 24)
-        x: (scene.width - width) / 2
-
-        KeybindsPopup { id: keybindsContent; anchors.fill: parent }
       }
 
       // ---- The bar, on top of everything ----

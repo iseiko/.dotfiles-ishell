@@ -34,5 +34,17 @@ Item {
       valueText: Math.round(Brightness.value * 100) + "%"
       onMoved: v => Brightness.setPercent(v * 100)
     }
+
+    // Night light (hyprsunset): click the name to turn it on or off
+    OsdSlider {
+      width: parent.width
+      visible: Hyprsunset.installed
+      label: "Night light"
+      value: Hyprsunset.level
+      dim: !Hyprsunset.active
+      valueText: Hyprsunset.active ? Hyprsunset.temperature + "K" : "Off"
+      onMoved: v => Hyprsunset.setLevel(v)
+      onLabelClicked: Hyprsunset.toggle()
+    }
   }
 }

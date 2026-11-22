@@ -24,7 +24,7 @@ Item {
   implicitWidth: 380
   implicitHeight: column.implicitHeight + 40
 
-  Keys.onEscapePressed: Visibilities.closeAll()
+  Keys.onEscapePressed: Visibilities.back()
 
   // Search for devices only while the panel is open
   Connections {

@@ -54,7 +54,7 @@ Item {
 
       Keys.onEscapePressed: {
         if (text !== "") text = ""
-        else Visibilities.closeAll()
+        else Visibilities.back()
       }
       Keys.onDownPressed: root.scrollBy(80)
       Keys.onUpPressed: root.scrollBy(-80)

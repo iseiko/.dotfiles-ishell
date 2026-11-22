@@ -50,7 +50,7 @@ Item {
 
       onTextChanged: list.currentIndex = 0
 
-      Keys.onEscapePressed: Visibilities.closeAll()
+      Keys.onEscapePressed: Visibilities.back()
       Keys.onDownPressed: list.incrementCurrentIndex()
       Keys.onUpPressed: list.decrementCurrentIndex()
       Keys.onReturnPressed: root.launch(root.results[list.currentIndex])

@@ -68,7 +68,7 @@ Item {
 
         Keys.onEscapePressed: {
           if (text !== "") text = ""
-          else Visibilities.closeAll()
+          else Visibilities.back()
         }
         Keys.onDownPressed: list.incrementCurrentIndex()
         Keys.onUpPressed: list.decrementCurrentIndex()

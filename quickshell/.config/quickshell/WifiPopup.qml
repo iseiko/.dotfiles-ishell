@@ -21,7 +21,7 @@ Item {
     }
   }
 
-  Keys.onEscapePressed: Visibilities.closeAll()
+  Keys.onEscapePressed: Visibilities.back()
 
   Column {
     id: column

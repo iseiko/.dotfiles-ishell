@@ -25,18 +25,25 @@ Singleton {
 
   onHoveredChanged: if (!hovered) hideTimer.restart()
 
-  // Called when volume or brightness changed
+  // Called when volume or brightness changed by itself (your keybinds...). It stays out of the way
+  // of the panels in the same corner, so it never interrupts a Wi-Fi password, for example.
   function notify() { if (ready) show() }
 
   function show() {
-    // the power, Wi-Fi and Bluetooth panels use the same corner
-    if (Visibilities.power || Visibilities.wifi || Visibilities.bluetooth) return
+    if (Visibilities.power || Visibilities.wifi || Visibilities.bluetooth
+        || Visibilities.keybinds) return
     Visibilities.osd = true
+    hideTimer.restart()
+  }
+
+  // You asked for it (clicked the module): it takes the place of whatever is open
+  function open() {
+    Visibilities.open("osd")
     hideTimer.restart()
   }
 
   function toggle() {
     if (Visibilities.osd) Visibilities.osd = false
-    else show()
+    else open()
   }
 }

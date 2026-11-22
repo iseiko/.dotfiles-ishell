@@ -32,7 +32,7 @@ Item {
     }
   }
 
-  Keys.onEscapePressed: Visibilities.closeAll()
+  Keys.onEscapePressed: Visibilities.back()
   Keys.onLeftPressed:  currentIndex = Math.max(0, currentIndex - 1)
   Keys.onRightPressed: currentIndex = Math.min(actions.length - 1, currentIndex + 1)
   Keys.onReturnPressed: run(actions[currentIndex])

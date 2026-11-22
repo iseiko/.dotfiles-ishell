@@ -24,6 +24,11 @@ Item {
       "open": "clipboard"
     },
     {
+      "label": "Calendar",
+      "icon": "calendar",
+      "open": "calendar"
+    },
+    {
       "label": "Wallpaper",
       "icon": "wallpaper",
       "open": "picker"
@@ -123,7 +128,10 @@ Item {
       search.text = ""
       list.currentIndex = 0
     } else if (entry.open) {
-      if (Visibilities[entry.open] !== undefined) Visibilities.toggle(entry.open)
+      if (Visibilities[entry.open] !== undefined) {
+        Visibilities.toggle(entry.open)
+        Visibilities.fromMenu = true   // Esc in that panel comes back to this menu
+      }
     } else if (entry.command) {
       Visibilities.closeAll()
       Quickshell.execDetached(["sh", "-c", entry.command])
@@ -164,7 +172,9 @@ Item {
     target: Visibilities
     function onMenuChanged() {
       if (!Visibilities.menu) return
-      root.levels = []
+      // Coming back from a panel: stay in the submenu we were in. Otherwise start from the top.
+      if (Visibilities.returningToMenu) Visibilities.returningToMenu = false
+      else root.levels = []
       search.text = ""
       list.currentIndex = 0
       Qt.callLater(() => search.forceActiveFocus())

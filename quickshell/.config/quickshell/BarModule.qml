@@ -5,6 +5,7 @@ Rectangle {
   id: root
 
   property string icon: ""
+  property string imageSource: ""  // an image to show instead of the icon (an app's own icon)
   property string value: ""        // shown next to the icon, e.g. "45%"
   property string label: ""        // shown above the bar while the mouse is over it
   property color iconColor: Theme.accent
@@ -25,8 +26,18 @@ Rectangle {
     anchors.centerIn: parent
     spacing: 6
 
+    Image {
+      anchors.verticalCenter: parent.verticalCenter
+      visible: root.imageSource !== ""
+      width: 18
+      height: 18
+      source: root.imageSource
+      sourceSize: Qt.size(36, 36)
+      fillMode: Image.PreserveAspectFit
+    }
     Text {
       anchors.verticalCenter: parent.verticalCenter
+      visible: root.imageSource === ""
       text: root.icon
       color: root.iconColor
       font.pixelSize: 16

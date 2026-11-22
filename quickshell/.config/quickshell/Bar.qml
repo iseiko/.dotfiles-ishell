@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Bluetooth
+import Quickshell.Services.SystemTray
 import Quickshell.Services.UPower
 import QtQuick
 
@@ -189,26 +190,46 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: Visibilities.toggle("music")
+        onClicked: {
+          Visibilities.musicAnchorX = root.musicCenter()
+          Visibilities.toggle("music")
+        }
       }
     }
   }
 
-  // CENTER: time and date
-  Row {
+  // CENTER: time and date, click = open the calendar
+  Rectangle {
     anchors.centerIn: parent
-    spacing: 12
+    height: 28
+    radius: 8
+    width: clockRow.implicitWidth + 24
+    color: clockMouse.containsMouse || Visibilities.calendar ? Theme.overlay : "transparent"
 
-    Text {
-      text: Qt.formatDateTime(clock.date, "HH:mm")
-      color: Theme.text
-      font.pixelSize: 15
-      font.bold: true
+    Row {
+      id: clockRow
+      anchors.centerIn: parent
+      spacing: 12
+
+      Text {
+        text: Qt.formatDateTime(clock.date, "HH:mm")
+        color: Theme.text
+        font.pixelSize: 15
+        font.bold: true
+      }
+      Text {
+        text: Qt.formatDateTime(clock.date, "ddd, dd MMM yyyy")
+        color: Theme.subtext
+        font.pixelSize: 15
+      }
     }
-    Text {
-      text: Qt.formatDateTime(clock.date, "ddd, dd MMM yyyy")
-      color: Theme.subtext
-      font.pixelSize: 15
+
+    MouseArea {
+      id: clockMouse
+      anchors.fill: parent
+      hoverEnabled: true
+      cursorShape: Qt.PointingHandCursor
+      onClicked: Visibilities.toggle("calendar")
     }
   }
 
@@ -216,6 +237,32 @@ Item {
   Row {
     anchors { right: parent.right; verticalCenter: parent.verticalCenter; rightMargin: 12 }
     spacing: 16
+
+    // Apps running in the background (their tray icon). They only show while the app is running.
+    // Click = go to the app (or open a window), right click = options (close, kill...).
+    Repeater {
+      model: SystemTray.items
+
+      delegate: BarModule {
+        id: trayModule
+        required property var modelData
+
+        visible: modelData.status !== Status.Passive
+        imageSource: modelData.icon
+        icon: modelData.icon === "" ? Icons.apps : ""
+        label: modelData.tooltipTitle !== "" ? modelData.tooltipTitle
+             : modelData.title !== "" ? modelData.title : modelData.id
+        active: Visibilities.traymenu && Tray.current === modelData
+
+        onClicked: button => {
+          if (button === Qt.RightButton) {
+            Tray.openMenu(modelData, trayModule.mapToItem(root, trayModule.width / 2, 0).x)
+          } else {
+            Tray.open(modelData)
+          }
+        }
+      }
+    }
 
     // Wi-Fi: click = open the panel, right click = turn Wi-Fi on or off
     BarModule {

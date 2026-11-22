@@ -20,6 +20,13 @@
         {
           "keys": [
             "SUPER",
+            "M"
+          ],
+          "desc": "Maximize"
+        },
+        {
+          "keys": [
+            "SUPER",
             "V"
           ],
           "desc": "Toggle floating"
@@ -47,7 +54,7 @@
           "keys": [
             "SUPER",
             "SHIFT",
-            "1-5"
+            "1-5 or S"
           ],
           "desc": "Move window to workspace"
         },
@@ -81,9 +88,48 @@
         {
           "keys": [
             "SUPER",
+            "I"
+          ],
+          "desc": "Wallpaper"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "L"
+          ],
+          "desc": "Lockscreen"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "SHIFT",
+            "V"
+          ],
+          "desc": "Clipboard"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "SHIFT",
+            "C"
+          ],
+          "desc": "Calendar"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "SHIFT",
             "K"
           ],
           "desc": "Keybinds"
+        },
+        {
+          "keys": [
+            "SUPER",
+            "SHIFT",
+            "M"
+          ],
+          "desc": "Music"
         }
       ]
     }

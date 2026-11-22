@@ -27,6 +27,8 @@ hl.bind(mainMod .. " + I", hl.dsp.exec_cmd("qs ipc call picker toggle"))
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("qs ipc call lock lock"))
 hl.bind("XF86PowerOff", hl.dsp.exec_cmd("qs ipc call power toggle"))
 hl.bind("SUPER + SHIFT + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
+hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd("qs ipc call calendar toggle"))
+hl.bind("SUPER + SHIFT + K", hl.dsp.exec_cmd("qs ipc call keybind toggle"))
 
 -- Focus 
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))

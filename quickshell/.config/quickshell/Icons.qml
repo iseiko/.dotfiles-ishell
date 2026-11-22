@@ -8,6 +8,7 @@ Singleton {
   readonly property string power:     String.fromCodePoint(0xF0425)
   readonly property string lock:      String.fromCodePoint(0xF033E)
   readonly property string suspend:   String.fromCodePoint(0xF0904)
+  readonly property string logout:    String.fromCodePoint(0xF0343)
   readonly property string hibernate: String.fromCodePoint(0xF02CA)
   readonly property string reboot:    String.fromCodePoint(0xF0709)
   readonly property string play:      String.fromCodePoint(0xF040A)

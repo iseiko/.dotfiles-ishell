@@ -14,6 +14,7 @@ Item {
     { label: "Lock",      icon: Icons.lock,      cmd: ["qs", "ipc", "call", "lock", "lock"] },
     { label: "Suspend",   icon: Icons.suspend,   cmd: ["systemctl", "suspend"] },
     { label: "Hibernate", icon: Icons.hibernate, cmd: ["systemctl", "hibernate"] },
+    { label: "Logout",    icon: Icons.logout,    cmd: ["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit"] },
     { label: "Reboot",    icon: Icons.reboot,    cmd: ["systemctl", "soft-reboot"] },
     { label: "Shutdown",  icon: Icons.power,     cmd: ["systemctl", "poweroff"] }
   ]

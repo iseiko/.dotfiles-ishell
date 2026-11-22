@@ -75,7 +75,7 @@ Scope {
 
   Timer {
     id: unlockTimer
-    interval: 550   // a bit more than the closing animation (500 ms)
+    interval: 580   // a bit more than the closing animation (520 ms)
     onTriggered: sessionLock.locked = false
   }
 
@@ -102,25 +102,52 @@ Scope {
         // p goes 0 -> 1 when the screen locks and 1 -> 0 when it unlocks.
         //   p = 0: the clock is exactly where it is in the bar (small, bottom center)
         //   p = 1: the clock is big in the middle of the lockscreen
+        //
+        // Locking uses a "decelerate" curve (it leaves the bar fast and settles slowly), unlocking
+        // an "accelerate" one (it gathers speed on its way back into the bar). These are the same
+        // curves the popups of the shell use.
         property real p: 0
-        Behavior on p {
-          NumberAnimation { duration: root.closing ? 500 : 800; easing.type: Easing.OutCubic }
+
+        NumberAnimation {
+          id: lockAnim
+          target: content
+          property: "p"
+          to: 1
+          duration: 950
+          easing.type: Easing.BezierSpline
+          easing.bezierCurve: [0.05, 0.7, 0.1, 1.0, 1.0, 1.0]
         }
+        NumberAnimation {
+          id: unlockAnim
+          target: content
+          property: "p"
+          to: 0
+          duration: 520
+          easing.type: Easing.BezierSpline
+          easing.bezierCurve: [0.3, 0.0, 0.8, 0.15, 1.0, 1.0]
+        }
+
         // Everything that is not the clock appears in the second half of the animation
-        readonly property real late: Math.max(0, Math.min(1, (p - 0.55) / 0.45))
+        readonly property real late: Math.max(0, Math.min(1, (p - 0.5) / 0.5))
 
         // Wait a moment so the surface is on screen before the animation starts
         Timer {
           running: true
           interval: 40
-          onTriggered: content.p = root.closing ? 0 : 1
+          onTriggered: if (!root.closing) lockAnim.start()
         }
         Connections {
           target: root
-          function onClosingChanged() { if (root.closing) content.p = 0 }
+          function onClosingChanged() {
+            if (root.closing) {
+              lockAnim.stop()
+              unlockAnim.start()
+            }
+          }
         }
 
         function lerp(a, b, t) { return a + (b - a) * t }
+        function alpha(c, a) { return Qt.rgba(c.r, c.g, c.b, a) }
 
         // ---- Where the clock starts (the bar, see Bar.qml) -------------------------------
         // Same fonts as the bar: time 15 bold, date 15, 12 px between them, centered in the screen
@@ -172,11 +199,16 @@ Scope {
           blur: content.p * 0.8       // 0 to 1, raise the 0.8 for more blur
           opacity: Math.min(1, content.p * 1.5)
         }
-        // Slight dark layer so the text is readable on bright wallpapers
+        // A dark layer so the text is readable on bright wallpapers: darker at the top and, most of
+        // all, at the bottom (where the buttons are)
         Rectangle {
           anchors.fill: parent
-          color: "black"
-          opacity: 0.25 * content.p
+          opacity: content.p
+          gradient: Gradient {
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.30) }
+            GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.18) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.45) }
+          }
         }
 
         // ---- Keyboard --------------------------------------------------------------------
@@ -191,6 +223,7 @@ Scope {
             root.buffer = ""
           } else if (event.text.length > 0 && !(event.modifiers & Qt.ControlModifier)) {
             root.buffer += event.text
+            if (root.status !== "") root.status = ""   // typing again clears "Wrong password"
           }
           event.accepted = true
         }
@@ -220,22 +253,54 @@ Scope {
 
           Item { width: 1; height: 24 }
 
+          // The password box
           Rectangle {
+            id: passBox
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 300; height: 48; radius: 12
-            color: Theme.surface
+            width: 320; height: 52; radius: 26
+            color: content.alpha(Theme.surface, 0.62)
             border.width: 2
-            border.color: root.status !== "" ? Theme.danger : Theme.accent
-            opacity: content.late
+            border.color: root.status !== "" ? Theme.danger : content.alpha(Theme.accent, 0.9)
+            Behavior on border.color { ColorAnimation { duration: 160 } }
 
+            opacity: content.late
+            scale: content.lerp(0.94, 1, content.late)
+            transform: Translate { x: content.shake }
+
+            // Placeholder, or "Checking..." while PAM answers
             Text {
+              id: hint
               anchors.centerIn: parent
-              // one dot per character typed
-              text: root.checking ? "Checking..."
-                  : root.buffer.length > 0 ? "●".repeat(root.buffer.length)
-                  : "Password"
-              color: root.buffer.length > 0 ? Theme.text : Theme.muted
+              visible: root.buffer.length === 0 || root.checking
+              text: root.checking ? "Checking..." : "Password"
+              color: root.checking ? Theme.text : Theme.muted
               font.pixelSize: 16
+
+              SequentialAnimation on opacity {
+                running: root.checking
+                loops: Animation.Infinite
+                onRunningChanged: if (!running) hint.opacity = 1
+                NumberAnimation { from: 1; to: 0.35; duration: 500; easing.type: Easing.InOutSine }
+                NumberAnimation { from: 0.35; to: 1; duration: 500; easing.type: Easing.InOutSine }
+              }
+            }
+
+            // One dot per character typed, each one pops in
+            Row {
+              anchors.centerIn: parent
+              spacing: 8
+              visible: root.buffer.length > 0 && !root.checking
+
+              Repeater {
+                model: Math.min(root.buffer.length, 20)
+                delegate: Rectangle {
+                  width: 10; height: 10; radius: 5
+                  color: Theme.text
+                  scale: 0
+                  Component.onCompleted: scale = 1
+                  Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutBack } }
+                }
+              }
             }
           }
 
@@ -248,12 +313,32 @@ Scope {
           }
         }
 
+        // A short shake of the password box when the password is wrong
+        property real shake: 0
+        SequentialAnimation {
+          id: shakeAnim
+          NumberAnimation { target: content; property: "shake"; to: -12; duration: 50 }
+          NumberAnimation { target: content; property: "shake"; to: 12; duration: 70 }
+          NumberAnimation { target: content; property: "shake"; to: -8; duration: 60 }
+          NumberAnimation { target: content; property: "shake"; to: 5; duration: 50 }
+          NumberAnimation { target: content; property: "shake"; to: 0; duration: 50 }
+        }
+        Connections {
+          target: root
+          function onStatusChanged() { if (root.status !== "") shakeAnim.restart() }
+        }
+
         // ---- The flying clock: starts as the bar's clock, ends as the big one ------------
+        // Every piece of text is drawn at its FINAL size and shrunk with `scale`. Changing the
+        // font size on every frame makes text jitter (the letters snap to the pixel grid each
+        // time), a scale moves smoothly.
         Text {
           text: content.timeStr
           color: Theme.text
           font.bold: true
-          font.pixelSize: content.lerp(15, 96, content.p)
+          font.pixelSize: 96
+          transformOrigin: Item.Center
+          scale: content.lerp(15 / 96, 1, content.p)
           x: content.lerp(content.startTimeX, content.width / 2, content.p) - width / 2
           y: content.lerp(content.startY, content.endY_time, content.p) - height / 2
         }
@@ -263,7 +348,9 @@ Scope {
         Text {
           text: barDate.text
           color: Theme.subtext
-          font.pixelSize: content.lerp(15, 20, content.p)
+          font.pixelSize: 20
+          transformOrigin: Item.Center
+          scale: content.lerp(15 / 20, 1, content.p)
           opacity: 1 - Math.min(1, content.p * 3)
           x: content.lerp(content.startDateX, content.width / 2, content.p) - width / 2
           y: content.lerp(content.startY, content.endY_date, content.p) - height / 2
@@ -271,7 +358,9 @@ Scope {
         Text {
           text: dateTarget.text
           color: Theme.subtext
-          font.pixelSize: content.lerp(15, 20, content.p)
+          font.pixelSize: 20
+          transformOrigin: Item.Center
+          scale: content.lerp(15 / 20, 1, content.p)
           opacity: Math.max(0, Math.min(1, (content.p - 0.15) * 2))
           x: content.lerp(content.startDateX, content.width / 2, content.p) - width / 2
           y: content.lerp(content.startY, content.endY_date, content.p) - height / 2
@@ -281,30 +370,59 @@ Scope {
         Rectangle {
           id: mediaCard
           visible: Media.player !== null
-          opacity: content.late
           anchors.horizontalCenter: parent.horizontalCenter
           anchors.top: stack.bottom
           anchors.topMargin: 36
-          width: 380; height: 84; radius: 18
-          color: Theme.surface
+          width: 440; height: 104; radius: 26
+          color: content.alpha(Theme.surface, 0.62)
+          border.width: 1
+          border.color: Qt.rgba(1, 1, 1, 0.09)
+
+          opacity: content.late
+          transform: Translate { y: (1 - content.late) * 18 }
+
+          readonly property var player: Media.player
+          readonly property real position: player ? player.position : 0
+          readonly property real length: player ? player.length : 0
+          readonly property real ratio: length > 0 ? Math.max(0, Math.min(1, position / length)) : 0
+
+          // MPRIS doesn't push the position, so ask for it while it plays
+          Timer {
+            interval: 500
+            repeat: true
+            running: mediaCard.visible && Media.playing && mediaCard.player
+                     && mediaCard.player.positionSupported && content.late > 0.5
+            onTriggered: mediaCard.player.positionChanged()
+          }
+
+          // The album art, blurred, as a tint (like the music popup)
+          RoundedImage {
+            anchors.fill: parent
+            radius: mediaCard.radius
+            source: Media.artUrl
+            blurAmount: 1
+            opacity: 0.30
+          }
 
           Row {
-            anchors { fill: parent; margins: 12 }
-            spacing: 12
+            anchors { left: parent.left; right: parent.right; top: parent.top; margins: 14 }
+            height: 64
+            spacing: 14
 
             // Album art (falls back to a note icon)
             Item {
-              width: 60; height: 60
+              id: art
+              width: 64; height: 64
               anchors.verticalCenter: parent.verticalCenter
 
               Rectangle {
                 anchors.fill: parent
-                radius: 12
+                radius: 16
                 color: Theme.overlay
               }
               RoundedImage {
                 anchors.fill: parent
-                radius: 12
+                radius: 16
                 source: Media.artUrl
               }
               Text {
@@ -312,21 +430,21 @@ Scope {
                 visible: Media.artUrl === ""
                 text: Icons.music
                 color: Theme.muted
-                font.pixelSize: 26
+                font.pixelSize: 28
               }
             }
 
             // Title and artist
             Column {
               anchors.verticalCenter: parent.verticalCenter
-              width: parent.width - 60 - 12 - controls.width - 12
-              spacing: 2
+              width: parent.width - art.width - controls.width - parent.spacing * 2
+              spacing: 3
 
               Text {
                 width: parent.width
                 text: Media.title
                 color: Theme.text
-                font.pixelSize: 15
+                font.pixelSize: 16
                 font.bold: true
                 elide: Text.ElideRight
               }
@@ -344,14 +462,16 @@ Scope {
             Row {
               id: controls
               anchors.verticalCenter: parent.verticalCenter
-              spacing: 4
+              spacing: 6
 
               Rectangle {
-                width: 36; height: 36; radius: 18
+                width: 38; height: 38; radius: 19
                 anchors.verticalCenter: parent.verticalCenter
                 opacity: Media.player && Media.player.canGoPrevious ? 1 : 0.35
-                color: prevMouse.containsMouse ? Theme.overlay : "transparent"
-                Text { anchors.centerIn: parent; text: Icons.prev; color: Theme.text; font.pixelSize: 20 }
+                color: prevMouse.containsMouse ? content.alpha(Theme.overlay, 0.9) : "transparent"
+                scale: prevMouse.pressed ? 0.9 : 1
+                Behavior on scale { NumberAnimation { duration: 100 } }
+                Text { anchors.centerIn: parent; text: Icons.prev; color: Theme.text; font.pixelSize: 21 }
                 MouseArea {
                   id: prevMouse
                   anchors.fill: parent
@@ -362,30 +482,36 @@ Scope {
               }
 
               Rectangle {
-                width: 40; height: 40
-                radius: Media.playing ? 12 : 20   // circle <-> rounded square, like the music popup
+                width: 46; height: 46
+                radius: Media.playing ? 15 : 23   // circle <-> rounded square, like the music popup
                 Behavior on radius { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
                 anchors.verticalCenter: parent.verticalCenter
                 color: Theme.accent
+                scale: playMouse.pressed ? 0.92 : playMouse.containsMouse ? 1.06 : 1
+                Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
                 Text {
                   anchors.centerIn: parent
                   text: Media.playing ? Icons.pause : Icons.play
                   color: Theme.base
-                  font.pixelSize: 20
+                  font.pixelSize: 22
                 }
                 MouseArea {
+                  id: playMouse
                   anchors.fill: parent
+                  hoverEnabled: true
                   cursorShape: Qt.PointingHandCursor
                   onClicked: if (Media.player && Media.player.canTogglePlaying) Media.player.togglePlaying()
                 }
               }
 
               Rectangle {
-                width: 36; height: 36; radius: 18
+                width: 38; height: 38; radius: 19
                 anchors.verticalCenter: parent.verticalCenter
                 opacity: Media.player && Media.player.canGoNext ? 1 : 0.35
-                color: nextMouse.containsMouse ? Theme.overlay : "transparent"
-                Text { anchors.centerIn: parent; text: Icons.next; color: Theme.text; font.pixelSize: 20 }
+                color: nextMouse.containsMouse ? content.alpha(Theme.overlay, 0.9) : "transparent"
+                scale: nextMouse.pressed ? 0.9 : 1
+                Behavior on scale { NumberAnimation { duration: 100 } }
+                Text { anchors.centerIn: parent; text: Icons.next; color: Theme.text; font.pixelSize: 21 }
                 MouseArea {
                   id: nextMouse
                   anchors.fill: parent
@@ -396,70 +522,147 @@ Scope {
               }
             }
           }
+
+          // How far the song is
+          Rectangle {
+            anchors {
+              left: parent.left; right: parent.right; bottom: parent.bottom
+              leftMargin: 20; rightMargin: 20; bottomMargin: 14
+            }
+            height: 4
+            radius: 2
+            color: Qt.rgba(1, 1, 1, 0.14)
+            visible: mediaCard.length > 0
+
+            Rectangle {
+              width: parent.width * mediaCard.ratio
+              height: parent.height
+              radius: parent.radius
+              color: Theme.accent
+            }
+          }
         }
 
-        // ---- Reboot / shutdown (bottom center, two clicks to confirm) --------------------
+        // ---- Logout / hibernate / reboot / shutdown (bottom center, two clicks to confirm) ---
         Row {
           anchors.horizontalCenter: parent.horizontalCenter
           anchors.bottom: parent.bottom
-          anchors.bottomMargin: 56
-          spacing: 12
-          opacity: content.late
+          anchors.bottomMargin: 44
+          spacing: 20
 
           Repeater {
             model: [
-              { label: "Reboot",   icon: "",           cmd: ["systemctl", "reboot"] },
-              { label: "Shutdown", icon: Icons.power,  cmd: ["systemctl", "poweroff"] }
+              {
+                label: "Logout", icon: Icons.logout, danger: false,
+                cmd: ["sh", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"]
+              },
+              { label: "Hibernate", icon: Icons.hibernate, danger: false, cmd: ["systemctl", "hibernate"] },
+              { label: "Reboot",    icon: Icons.reboot,    danger: true,  cmd: ["systemctl", "reboot"] },
+              { label: "Shutdown",  icon: Icons.power,     danger: true,  cmd: ["systemctl", "poweroff"] }
             ]
 
-            delegate: Rectangle {
+            delegate: Item {
               id: btn
               required property var modelData
-              property bool armed: false   // first click arms it for 3 seconds, second click runs it
+              required property int index
 
-              width: 150; height: 44; radius: 12
-              color: armed ? Theme.danger : btnMouse.containsMouse ? Theme.overlay : Theme.surface
+              property bool armed: false   // first click arms it for 3 seconds, second click runs it
+              property real remaining: 0   // 1 -> 0 while it is armed, drawn as a thin line
+
+              // The buttons come in one after the other, a little after the clock arrived
+              readonly property real appear: Math.max(0, Math.min(1, (content.late - index * 0.12) / 0.64))
+
+              width: 78
+              height: 96
+              opacity: appear
+              transform: Translate { y: (1 - btn.appear) * 16 }
+
+              function disarm() {
+                armed = false
+                countdown.stop()
+                remaining = 0
+              }
 
               Timer {
-                id: disarm
+                id: disarmTimer
                 interval: 3000
-                onTriggered: btn.armed = false
+                onTriggered: btn.disarm()
+              }
+              NumberAnimation {
+                id: countdown
+                target: btn
+                property: "remaining"
+                from: 1
+                to: 0
+                duration: 3000
               }
 
-              Row {
-                anchors.centerIn: parent
-                spacing: 8
+              Column {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 9
 
-                Text {
-                  anchors.verticalCenter: parent.verticalCenter
-                  visible: btn.modelData.icon !== ""
-                  text: btn.modelData.icon
-                  color: btn.armed ? Theme.base : Theme.danger
-                  font.pixelSize: 16
-                }
-                Text {
-                  anchors.verticalCenter: parent.verticalCenter
-                  text: btn.armed ? "Click again" : btn.modelData.label
-                  color: btn.armed ? Theme.base : Theme.text
-                  font.pixelSize: 14
-                }
-              }
+                // The round button
+                Rectangle {
+                  anchors.horizontalCenter: parent.horizontalCenter
+                  width: 62; height: 62; radius: 31
 
-              MouseArea {
-                id: btnMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                  if (btn.armed) {
-                    btn.armed = false
-                    disarm.stop()
-                    Quickshell.execDetached(btn.modelData.cmd)
-                  } else {
-                    btn.armed = true
-                    disarm.restart()
+                  color: btn.armed ? Theme.danger
+                       : btnMouse.containsMouse ? content.alpha(Theme.overlay, 0.92)
+                       : content.alpha(Theme.surface, 0.62)
+                  border.width: 1
+                  border.color: btn.armed ? Theme.danger : Qt.rgba(1, 1, 1, btnMouse.containsMouse ? 0.18 : 0.09)
+                  scale: btnMouse.pressed ? 0.93 : btn.armed ? 1.1 : btnMouse.containsMouse ? 1.06 : 1
+
+                  Behavior on color { ColorAnimation { duration: 150 } }
+                  Behavior on border.color { ColorAnimation { duration: 150 } }
+                  Behavior on scale { NumberAnimation { duration: 160; easing.type: Easing.OutBack } }
+
+                  Text {
+                    anchors.centerIn: parent
+                    text: btn.modelData.icon
+                    color: btn.armed ? Theme.base : btn.modelData.danger ? Theme.danger : Theme.text
+                    font.pixelSize: 25
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                  }
+
+                  MouseArea {
+                    id: btnMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                      if (btn.armed) {
+                        btn.disarm()
+                        disarmTimer.stop()
+                        Quickshell.execDetached(btn.modelData.cmd)
+                      } else {
+                        btn.armed = true
+                        disarmTimer.restart()
+                        countdown.restart()
+                      }
+                    }
                   }
                 }
+
+                // The name, or what to do next
+                Text {
+                  anchors.horizontalCenter: parent.horizontalCenter
+                  text: btn.armed ? "Click again" : btn.modelData.label
+                  color: btn.armed ? Theme.danger : Theme.subtext
+                  font.pixelSize: 12
+                  font.bold: btn.armed
+                }
+              }
+
+              // Time left to confirm: a thin line that empties in 3 seconds
+              Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                width: 46 * btn.remaining
+                height: 2
+                radius: 1
+                color: Theme.danger
+                visible: btn.armed
               }
             }
           }

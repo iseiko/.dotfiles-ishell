@@ -143,13 +143,13 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
 
 [X] Fix wallpaper rounding on wallpaper chooser script
 
-[ ] Add calendar on the mains clock 
+[X] Add calendar on the mains clock 
 
 [ ] Add power-profiles configuration tlpctl
 
 [ ] Add icon tray for background apps
 
-[ ] Fix animations
+[X] Fix animations
 
 [ ] Configure lockscreen
 

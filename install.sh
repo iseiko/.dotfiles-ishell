@@ -25,7 +25,7 @@ fi
 
 echo "Now all the packages needed will be installed!"
 
-paru -Syyu --noconfirm --needed zen-browser oh-my-posh-bin neovim kitty hyprland noto-fonts noto-fonts-emoji noto-fonts-cjk ttf-dejavu ttf-jetbrains-mono-nerd ttf-ms-fonts ttf-symbola fira-code-nerd-fonts stow eza zoxide hyprpolkitagent pipewire pipewire-alsa pipewire-jack pipewire-pulse wireplumber bluez blueman bluez-utils python-pillow libnotify awww quickshell zsh matugen-bin fzf hyprsunset hypridle 
+paru -Syyu --noconfirm --needed zen-browser oh-my-posh-bin neovim kitty hyprland noto-fonts noto-fonts-emoji noto-fonts-cjk ttf-dejavu ttf-jetbrains-mono-nerd ttf-ms-fonts ttf-symbola fira-code-nerd-fonts stow eza zoxide hyprpolkitagent pipewire pipewire-alsa pipewire-jack pipewire-pulse wireplumber bluez blueman bluez-utils python-pillow libnotify awww quickshell zsh matugen-bin fzf hyprsunset hypridle slurp grim ddcutil ripgrep 
 
 # Set zsh as the main shell
 
@@ -41,6 +41,12 @@ fi
 ' > /dev/zsh/zshenv
 
 sudo chsh -s  $(which zsh)
+
+# Configure monitor brightness
+
+sudo pacman -S ddcutil
+sudo modprobe i2c-dev
+sudo usermod -aG i2c $USER
 
 # Configure needed directories
 

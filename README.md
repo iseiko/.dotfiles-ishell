@@ -158,6 +158,8 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
 
 [ ] Configure lockscreen
 
+[ ] Add persistant night light config
+
 [X] Add logout option
 
 

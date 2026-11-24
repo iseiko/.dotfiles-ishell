@@ -115,26 +115,47 @@ Scope {
           to: 1
           duration: 950
           easing.type: Easing.BezierSpline
-          easing.bezierCurve: [0.03, 0.5, 0.1, 1.0, 1.0, 1.0]
+          easing.bezierCurve: [0.05, 0.7, 0.1, 1.0, 1.0, 1.0]
         }
         NumberAnimation {
           id: unlockAnim
           target: content
           property: "p"
           to: 0
-          duration: 350
+          duration: 520
           easing.type: Easing.BezierSpline
-          easing.bezierCurve: [0.4, 0.5, 0.6, 0.7, 1.0, 1.0]
+          easing.bezierCurve: [0.3, 0.0, 0.8, 0.15, 1.0, 1.0]
         }
 
         // Everything that is not the clock appears in the second half of the animation
         readonly property real late: Math.max(0, Math.min(1, (p - 0.5) / 0.5))
 
-        // Wait a moment so the surface is on screen before the animation starts
+        // The animation starts when the surface is on screen AND the wallpaper has loaded, so the
+        // lockscreen never begins as an empty color. If the wallpaper is slow, it starts anyway.
+        property bool surfaceUp: false
+        property bool giveUp: false
+        property bool started: false
+
+        function tryStart() {
+          if (started || root.closing || !surfaceUp) return
+          if (wallpaper.status !== Image.Ready && !giveUp) return
+          started = true
+          lockAnim.start()
+        }
+
         Timer {
           running: true
-          interval: 40
-          onTriggered: if (!root.closing) lockAnim.start()
+          interval: 60
+          onTriggered: { content.surfaceUp = true; content.tryStart() }
+        }
+        Timer {
+          running: true
+          interval: 400
+          onTriggered: { content.giveUp = true; content.tryStart() }
+        }
+        Connections {
+          target: wallpaper
+          function onStatusChanged() { content.tryStart() }
         }
         Connections {
           target: root
@@ -174,7 +195,12 @@ Scope {
         readonly property real endY_time: stack.y + timeTarget.y + timeTarget.height / 2
         readonly property real endY_date: stack.y + dateTarget.y + dateTarget.height / 2
 
-        // ---- Background: the frame color first, then the wallpaper fades in --------------
+        // ---- Background -------------------------------------------------------------------
+        // The lockscreen cannot be see-through: while the session is locked the compositor hides
+        // every other window and shows only this surface, so a transparent area would show nothing
+        // of your desktop. Instead it STARTS looking like your desktop: the wallpaper, sharp, with
+        // the shell's frame and bar on top (below). Then the frame fades away and the wallpaper blurs.
+        // This plain color is only seen if the wallpaper has not loaded yet.
         Rectangle {
           anchors.fill: parent
           color: Theme.base
@@ -197,7 +223,13 @@ Scope {
           blurEnabled: true
           blurMax: 64
           blur: content.p * 0.8       // 0 to 1, raise the 0.8 for more blur
-          opacity: Math.min(1, content.p * 1.5)
+        }
+
+        // The frame and the bar of the shell, so the first frame looks like the desktop.
+        // It fades away quickly while the clock leaves the bar.
+        ScreenFrame {
+          anchors.fill: parent
+          opacity: 1 - Math.min(1, content.p * 2.5)
         }
         // A dark layer so the text is readable on bright wallpapers: darker at the top and, most of
         // all, at the bottom (where the buttons are)
@@ -205,9 +237,9 @@ Scope {
           anchors.fill: parent
           opacity: content.p
           gradient: Gradient {
-            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.45) }
-            GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.35) }
-            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.55) }
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.30) }
+            GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.18) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.45) }
           }
         }
 

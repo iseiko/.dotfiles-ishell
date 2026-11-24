@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Qt.labs.folderlistmodel
+import Qt5Compat.GraphicalEffects
 
 // The wallpaper picker (content of its popout)
 Item {
@@ -75,16 +76,32 @@ Item {
 
       width: 240
       height: ListView.view.height
-      radius: 10
+      radius: 15
       clip: true
       color: Theme.surface
 
       Image {
+        id: image
         anchors.fill: parent
         source: "file://" + parent.filePath
         sourceSize.width: 480
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
+        visible: false
+      }
+
+      Rectangle {
+        id: circleMask
+        anchors.fill: parent
+        radius: 15
+        visible: false
+        antialiasing: true
+      }
+
+      OpacityMask {
+        anchors.fill: image
+        source: image
+        maskSource: circleMask
       }
 
       // Selection highlight, drawn ABOVE the image

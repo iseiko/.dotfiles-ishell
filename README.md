@@ -93,7 +93,8 @@ paru -S quickshell-git matugen-bin oh-my-posh-bin awww   # or your AUR helper of
 
 ```sh
 
-git clone https://github.com/iseiko/.dotfiles-ishell.git 
+git clone https://github.com/iseiko/.dotfiles-ishell.git
+
 cd ~/dotfiles-ishell
 
 sh ./install.sh
@@ -141,7 +142,7 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
     
 <h2 align='center'>To Do</h2>
 
-[ ] Fix wallpaper rounding on wallpaper chooser script
+[X] Fix wallpaper rounding on wallpaper chooser script
 
 [X] Add calendar on the mains clock 
 

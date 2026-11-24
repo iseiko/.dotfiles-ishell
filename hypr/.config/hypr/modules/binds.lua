@@ -29,6 +29,7 @@ hl.bind("XF86PowerOff", hl.dsp.exec_cmd("qs ipc call power toggle"))
 hl.bind("SUPER + SHIFT + V", hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd("qs ipc call calendar toggle"))
 hl.bind("SUPER + SHIFT + K", hl.dsp.exec_cmd("qs ipc call keybinds toggle"))
+hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("qs ipc call power toggle"))
 
 -- Focus 
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))

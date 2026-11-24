@@ -147,6 +147,10 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
 
 [ ] Add power-profiles configuration tlpctl
 
+[ ] Add keyboard layout switch icon and configuration
+
+[ ] Reestructure readme
+
 [X] Add icon tray for background apps
 
 [X] Fix animations

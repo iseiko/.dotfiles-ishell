@@ -33,3 +33,9 @@ hl.gesture({
   action = "special",
   workspace_name = "magic"
 })
+
+hl.device({
+    name = "dualsense-wireless-controller-touchpad",
+    enabled = false,
+})
+

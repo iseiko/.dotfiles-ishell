@@ -20,20 +20,21 @@ Singleton {
   property bool calendar: false
   property bool traymenu: false
 
-  // The volume/brightness panel. It pops out and hides by itself (see Osd.qml), so it is NOT part
-  // of `any`: it never takes the whole screen's input.
-  property bool osd: false
+  // The volume panel and the brightness panel. They pop out and hide by themselves (see Osd.qml),
+  // so they are NOT part of `any`: they never take the whole screen's input.
+  property bool volume: false
+  property bool brightness: false
 
   readonly property var names: [
     "launcher", "power", "picker", "music", "wifi", "bluetooth",
-    "menu", "keybinds", "clipboard", "screenshot", "calendar", "traymenu", "osd"
+    "menu", "keybinds", "clipboard", "screenshot", "calendar", "traymenu", "volume", "brightness"
   ]
 
   // All the popups are pages of ONE panel (see MorphPopout.qml). This is the page that is open
   // ("" = closed). The new popup is always turned on before the old one is turned off, so the
   // panel never goes through "closed" on its way from one page to another.
   readonly property string page: wifi ? "wifi" : bluetooth ? "bluetooth"
-                               : osd ? "osd" : power ? "power" : traymenu ? "traymenu"
+                               : volume ? "volume" : brightness ? "brightness" : power ? "power" : traymenu ? "traymenu"
                                : launcher ? "launcher" : menu ? "menu" : clipboard ? "clipboard"
                                : keybinds ? "keybinds" : screenshot ? "screenshot"
                                : calendar ? "calendar" : music ? "music" : picker ? "picker" : ""
@@ -61,7 +62,8 @@ Singleton {
     calendar = false
     traymenu = false
     fromMenu = false
-    osd = false
+    volume = false
+    brightness = false
   }
 
   // True while a panel that was opened from the main menu is on screen: Esc then goes back to the

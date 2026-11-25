@@ -24,7 +24,7 @@ Singleton {
                                   : false
   readonly property real value: maximum > 0 ? current / maximum : 0   // 0 to 1
 
-  onValueChanged: Osd.notify()
+  onValueChanged: Osd.notify("brightness")
 
   // ---- Finding what to control, once, at startup ----------------------------
 

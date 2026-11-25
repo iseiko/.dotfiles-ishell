@@ -303,22 +303,22 @@ Item {
       iconColor: Audio.muted ? Theme.muted : Theme.accent
       value: Audio.muted ? "" : Math.round(Audio.volume * 100) + "%"
       label: Audio.muted ? "Volume - muted" : "Volume"
-      active: Visibilities.osd
+      active: Visibilities.volume
       onClicked: button => {
         if (button === Qt.RightButton) Audio.toggleMute()
-        else Osd.toggle()
+        else Osd.toggle("volume")
       }
       onScrolled: delta => Audio.changeVolume(delta > 0 ? 0.05 : -0.05)
     }
 
     // Brightness: click = open the panel, scroll = change. Hidden when there is no backlight.
     BarModule {
-      visible: Brightness.available
-      icon: Icons.brightness(Brightness.value)
-      value: Math.round(Brightness.value * 100) + "%"
+      visible: Brightness.available || Night.available
+      icon: Icons.brightness(Brightness.available ? Brightness.value : 0.7)
+      value: Brightness.available ? Math.round(Brightness.value * 100) + "%" : ""
       label: "Brightness"
-      active: Visibilities.osd
-      onClicked: Osd.toggle()
+      active: Visibilities.brightness
+      onClicked: Osd.toggle("brightness")
       onScrolled: delta => Brightness.change(delta > 0 ? 5 : -5)
     }
 

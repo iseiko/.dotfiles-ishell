@@ -80,13 +80,13 @@ Scope {
   // Volume and brightness. Keybinds can call these, e.g. `qs ipc call osd volumeUp`
   IpcHandler {
     target: "osd"
-    function show(): void { Osd.open() }
+    function show(): void { Osd.open("volume") }
+    function showBrightness(): void { Osd.open("brightness") }
     function volumeUp(): void { Audio.changeVolume(0.05) }
     function volumeDown(): void { Audio.changeVolume(-0.05) }
     function volumeMute(): void { Audio.toggleMute() }
     function brightnessUp(): void { Brightness.change(5) }
     function brightnessDown(): void { Brightness.change(-5) }
-    function nightlight(): void { Hyprsunset.toggle() }
     function nightToggle(): void { Night.toggle() }
   }
 
@@ -163,7 +163,8 @@ Scope {
         // In the bottom-right corner, against the frame
         MorphPage { panel: mainPanel; name: "wifi"; corner: true; WifiPopup { anchors.fill: parent } }
         MorphPage { panel: mainPanel; name: "bluetooth"; corner: true; BluetoothPopup { anchors.fill: parent } }
-        MorphPage { panel: mainPanel; name: "osd"; corner: true; OsdPopup { anchors.fill: parent } }
+        MorphPage { panel: mainPanel; name: "volume"; corner: true; VolumePopup { anchors.fill: parent } }
+        MorphPage { panel: mainPanel; name: "brightness"; corner: true; BrightnessPopup { anchors.fill: parent } }
         MorphPage { panel: mainPanel; name: "power"; corner: true; PowerPopup { anchors.fill: parent } }
         MorphPage { panel: mainPanel; name: "traymenu"; corner: true; TrayMenuPopup { anchors.fill: parent } }
 

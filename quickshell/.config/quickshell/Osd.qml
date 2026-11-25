@@ -3,11 +3,16 @@ pragma Singleton
 import Quickshell
 import QtQuick
 
-// Decides when the volume/brightness panel pops out and when it goes away again
+// Decides when the volume panel and the brightness panel pop out, and when they go away again.
+// `kind` is always "volume" or "brightness".
 Singleton {
   id: root
 
-  property bool hovered: false   // the mouse is over the panel, so keep it open
+  // The mouse is over one of the panels, so it stays open
+  property bool hoveredVolume: false
+  property bool hoveredBrightness: false
+  readonly property bool hovered: hoveredVolume || hoveredBrightness
+
   property bool ready: false
 
   // Volume and brightness change while the shell is starting, don't pop out for that
@@ -20,30 +25,39 @@ Singleton {
   Timer {
     id: hideTimer
     interval: 2200
-    onTriggered: if (!root.hovered) Visibilities.osd = false
+    onTriggered: {
+      if (root.hovered) return
+      Visibilities.volume = false
+      Visibilities.brightness = false
+    }
   }
 
   onHoveredChanged: if (!hovered) hideTimer.restart()
 
-  // Called when volume or brightness changed by itself (your keybinds...). It stays out of the way
-  // of the panels in the same corner, so it never interrupts a Wi-Fi password, for example.
-  function notify() { if (ready) show() }
+  // Called when the volume or the brightness changed by itself (your keybinds, the night light...).
+  // It stays out of the way of the panels in the same corner, so it never interrupts a Wi-Fi
+  // password, for example.
+  function notify(kind) { if (ready) show(kind) }
 
-  function show() {
+  function show(kind) {
     if (Visibilities.power || Visibilities.wifi || Visibilities.bluetooth
-        || Visibilities.keybinds) return
-    Visibilities.osd = true
+        || Visibilities.keybinds || Visibilities.traymenu) return
+
+    // If the other one is showing, change into this one (the new one is turned on first)
+    const other = kind === "volume" ? "brightness" : "volume"
+    Visibilities[kind] = true
+    Visibilities[other] = false
     hideTimer.restart()
   }
 
   // You asked for it (clicked the module): it takes the place of whatever is open
-  function open() {
-    Visibilities.open("osd")
+  function open(kind) {
+    Visibilities.open(kind)
     hideTimer.restart()
   }
 
-  function toggle() {
-    if (Visibilities.osd) Visibilities.osd = false
-    else open()
+  function toggle(kind) {
+    if (Visibilities[kind]) Visibilities[kind] = false
+    else open(kind)
   }
 }

@@ -162,6 +162,12 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
 
 [X] Add logout option
 
+[ ] Separate sound and brightness modules
+
+[ ] Add a sound source option
+
+[ ] Add backlight popup 
+
 
 <h2 align='center'>Credits</h2>
 

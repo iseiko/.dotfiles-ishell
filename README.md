@@ -170,6 +170,7 @@ See [`hypr/modules/binds.lua`](https://claude.ai/chat/.config/hypr/modules/binds
 
 [ ] Add notification center
 
+[ ] Fix bluetooth module not coming back to menu
 
 <h2 align='center'>Credits</h2>
 
